@@ -102,7 +102,7 @@ sealed class Routes(
 
     data object MainAllMakeUpTemplate :
         Routes("home/all_makeup_template/{${MAKE_UP_CATEGORY_ID}}") {
-        fun createRoute(makeupCategoryID: String) = "home/all_makeup_template/$makeupCategoryID"
+        fun createRoute(makeupCategoryID: List<String>) = "home/all_makeup_template/$makeupCategoryID"
 
     }
 

@@ -1,5 +1,6 @@
 package com.iec.makeup.ui.navigation
 
+import android.util.Log
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.material3.Text
@@ -49,14 +50,14 @@ fun NavigationGraph(
     NavHost(navController = navController, startDestination = "auth") {
 
         composable(
-            route = "login-success?code={tempCode}",
+            route = "makeup://login-success?code={tempCode}",
             deepLinks = listOf(
                 navDeepLink {
                     uriPattern = "makeup://login-success?code={tempCode}"
                 }
             ),
             arguments = listOf(
-                navArgument("code") { nullable = true }
+                navArgument("tempCode") { nullable = true }
             )
         ) {
             appState.setVisibleBottomNav(false)
@@ -70,7 +71,8 @@ fun NavigationGraph(
                         restoreState = false
                     }
                 },
-                navBack = { navController.popBackStack() }
+                navBack = { navController.popBackStack() },
+                token = it.arguments?.getString("tempCode")
             )
         }
 
@@ -259,16 +261,16 @@ fun NavigationGraph(
             composable(
                 route = Routes.MainAllMakeUpTemplate.route,
                 arguments = listOf(
-                    navArgument(Routes.MAKE_UP_CATEGORY_ID) { type = NavType.StringType }
+                    navArgument(Routes.MAKE_UP_CATEGORY_ID) { type = NavType.StringListType }
                 )
             ) {
                 appState.setVisibleBottomNav(true)
-                val idCategory = it.arguments?.getString(Routes.MAKE_UP_CATEGORY_ID) ?: "0"
+                val idCategory = it.arguments?.getStringArrayList(Routes.MAKE_UP_CATEGORY_ID)?.toList() ?: emptyList()
                 ScreenAllMakeupTemplateOfCategoryStateful(
                     navBack = {
                         navController.popBackStack()
                     },
-                    categoryID = idCategory,
+                    categoryID = idCategory as List<String>,
                     navToTemplateDetail = { id ->
                         navController.navigate(Routes.MailDetailMakeUpTemplate.createRoute(id))
                     }

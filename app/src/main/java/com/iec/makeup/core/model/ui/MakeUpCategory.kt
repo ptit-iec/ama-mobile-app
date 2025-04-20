@@ -1,12 +1,15 @@
 package com.iec.makeup.core.model.ui
 
+import com.iec.makeup.ui.features.ai_makeup.business.AIScreenEvent
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class MakeUpLayout(
     val id: String,
     val title: String,
-    val image: String
+    val image: String,
+    val makeUpTemplateId: List<String> = emptyList<String>(),
+    val description: String = ""
 )
 
 

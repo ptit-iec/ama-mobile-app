@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -37,6 +38,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.iec.makeup.core.model.User
 import com.iec.makeup.core.model.ui.fakeMakeUpLayoutData
 import com.iec.makeup.core.model.ui.mockListData
+import com.iec.makeup.core.ui.AtomicLoadingDialog
+import com.iec.makeup.data.remote.dto.toMakeUpTemplateCategory
 import com.iec.makeup.ui.features.home.components.AutoScrollingHorizontalCardList
 import com.iec.makeup.ui.features.home.components.FollowerStoryList
 import com.iec.makeup.ui.features.home.components.MakeUpStyleLayout
@@ -61,7 +64,7 @@ fun HomeScreen(
     navToAllMakeUpArtist: () -> Unit = {},
     navToPersonalInfo: (String) -> Unit = {},
     navToChatting: () -> Unit = {},
-    navToAllTemplate: (String) -> Unit = {}
+    navToAllTemplate: (List<String>) -> Unit = {}
 ) {
     val context = LocalContext.current
     val viewModel: HomeScreenVM = hiltViewModel()
@@ -76,8 +79,10 @@ fun HomeScreen(
         navToChatting = navToChatting,
         navToAllTemplate = navToAllTemplate,
         state = state.value
-
     )
+    if (state.value.isRefreshing) {
+        AtomicLoadingDialog()
+    }
 }
 
 
@@ -88,7 +93,7 @@ fun AuraBeautyApp(
     navToAllMakeUp: () -> Unit = {},
     navToPersonalInfo: (String) -> Unit = {},
     navToChatting: () -> Unit = {},
-    navToAllTemplate: (String) -> Unit = {},
+    navToAllTemplate: (List<String>) -> Unit = {},
     state: HomeScreenState = HomeScreenState()
 ) {
     val scrollview = rememberScrollState()
@@ -122,7 +127,8 @@ fun AuraBeautyApp(
                 showNotifications = navToNotification,
                 showChat = navToChatting,
                 showSearch = navToSearch,
-                image = state.userProfile?.avatar ?: "https://blog.maika.ai/wp-content/uploads/2024/02/anh-meo-meme-2.jpg"
+                image = state.userProfile?.avatar
+                    ?: "https://blog.maika.ai/wp-content/uploads/2024/02/anh-meo-meme-2.jpg"
             )
             // Content
             Column(
@@ -263,18 +269,30 @@ fun AuraBeautyApp(
                     )
                 }
 
-                val mockCategory = fakeMakeUpLayoutData()
-
-                LazyRow {
-                    items(
-                        count = mockCategory.size,
-                    ) {
-                        Box(
-                            modifier = Modifier.clickable {
-                                navToAllTemplate(it.toString())
-                            }
+                if (state.listMakeUpTemplateCategory.isEmpty()) {
+                    Text(
+                        text = "No Makeup Template Category",
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 18.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 12.dp, bottom = 12.dp)
+                    )
+                } else {
+                    LazyRow {
+                        items(
+                            count = state.listMakeUpTemplateCategory.size,
                         ) {
-                            MakeUpStyleLayout(item = mockCategory[it])
+                            Box(
+                                modifier = Modifier.clickable {
+                                    navToAllTemplate(
+                                        state.listMakeUpTemplateCategory[it].toMakeUpTemplateCategory().makeUpTemplateId
+                                    )
+                                }
+                            ) {
+                                MakeUpStyleLayout(item = state.listMakeUpTemplateCategory[it].toMakeUpTemplateCategory())
+                            }
                         }
                     }
                 }

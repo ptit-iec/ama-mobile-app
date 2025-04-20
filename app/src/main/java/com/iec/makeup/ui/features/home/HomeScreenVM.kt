@@ -6,9 +6,14 @@ import com.iec.makeup.core.BaseViewModel
 import com.iec.makeup.core.Reducer
 import com.iec.makeup.core.model.User
 import com.iec.makeup.data.remote.api.UserEndpoint
+import com.iec.makeup.data.remote.dto.MakeUpTemplateCategoryDTO
 import com.iec.makeup.data.remote.dto.toUser
+import com.iec.makeup.data.repository.MakeUpTemplateCategoryRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.launchIn
 import javax.inject.Inject
 
 
@@ -23,16 +28,22 @@ data class HomeScreenState(
     val orderToReceive: List<String> = emptyList(),
     val orderToReview: List<String> = emptyList(),
 
-    // Reels Section
+    // Makeup Template Category
+    val listMakeUpTemplateCategory: List<MakeUpTemplateCategoryDTO> = emptyList()
 ) : Reducer.ViewState
 
 
 sealed class HomeScreenEvent : Reducer.ViewEvent {
-    data class LoadInitData(val user: User) : HomeScreenEvent()
+    data class LoadInitData(
+        val user: User,
+        val listMakeUpTemplateCategory: List<MakeUpTemplateCategoryDTO> = emptyList()
+    ) : HomeScreenEvent()
+    data class OnLoading(val isLoading: Boolean) : HomeScreenEvent()
+    data class OnShowError(val error: String?) : HomeScreenEvent()
 }
 
 sealed class HomeScreenEffect : Reducer.ViewEffect {
-
+    data class OnShowError(val error: String?) : HomeScreenEffect()
 }
 
 
@@ -44,10 +55,21 @@ class HomeScreenReducer : Reducer<HomeScreenState, HomeScreenEvent, HomeScreenEf
         return when (event) {
             is HomeScreenEvent.LoadInitData -> {
                 currentState.copy(
-                    userProfile = event.user
-                ) to null
+                    userProfile = event.user,
+                    listMakeUpTemplateCategory = event.listMakeUpTemplateCategory
+                    ) to null
             }
 
+            is HomeScreenEvent.OnLoading -> {
+                currentState.copy(
+                    isLoading = event.isLoading
+                ) to null
+            }
+            is HomeScreenEvent.OnShowError -> {
+                currentState.copy(
+                    error = event.error
+                ) to HomeScreenEffect.OnShowError(event.error)
+            }
             else -> currentState to null
         }
     }
@@ -57,23 +79,45 @@ class HomeScreenReducer : Reducer<HomeScreenState, HomeScreenEvent, HomeScreenEf
 
 @HiltViewModel
 class HomeScreenVM @Inject constructor(
-    private val userEndpoint: UserEndpoint
+    private val userEndpoint: UserEndpoint,
+    private val makeUpTemplateCategory: MakeUpTemplateCategoryRepository
 ) : BaseViewModel<HomeScreenState, HomeScreenEvent, HomeScreenEffect>(
     initialState = HomeScreenState(),
     reducer = HomeScreenReducer()
 ) {
     init {
-        viewModelScope.launch {
-            val a = userEndpoint.getUsers()
-            if (a.isSuccessful) {
-                Log.d("HomeScreenVM", "init: ${a.body()}")
-                val data = a.body()
-                if (data != null) {
-                    if (data.success == true) {
-                        sendEvent(HomeScreenEvent.LoadInitData(data.data!!.toUser()))
-                    }
-                }
+        sendEvent(HomeScreenEvent.OnLoading(true))
+        combine(
+            getAllMakeUpTemplateCategory(),
+            getUser()
+        ) { makeUpTemplateCategory, user ->
+            Log.d("HomeScreenVM", "combine: $makeUpTemplateCategory $user")
+            if(user == null){
+                sendEventWithEffect(HomeScreenEvent.OnShowError("User not found"))
             }
+            else{
+                sendEvent(HomeScreenEvent.LoadInitData(user, makeUpTemplateCategory))
+            }
+        }.launchIn(viewModelScope)
+        sendEvent(HomeScreenEvent.OnLoading(false))
+    }
+
+    private fun getAllMakeUpTemplateCategory() = callbackFlow {
+        trySend(makeUpTemplateCategory.getAllMakeUpTemplateCategory())
+        awaitClose{
+
+        }
+    }
+    private fun getUser()  = callbackFlow {
+        val a = userEndpoint.getUsers()
+        if (a.isSuccessful) {
+            val data = a.body()
+            if (data != null && data.success == true) {
+                trySend(data.data?.toUser())
+            }
+        }
+        awaitClose {
+
         }
     }
 }

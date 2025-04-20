@@ -9,10 +9,16 @@ import com.iec.makeup.core.network.TokenManager
 import com.iec.makeup.core.utils.Constants.BASE_URL
 import com.iec.makeup.core.utils.Constants.TIME_OUT
 import com.iec.makeup.data.remote.api.AuthEndpoint
+import com.iec.makeup.data.remote.api.MakeUpTempCategoryEndpoint
+import com.iec.makeup.data.remote.api.MakeUpTemplateEndpoint
 import com.iec.makeup.data.remote.api.UserEndpoint
+import com.iec.makeup.data.remote.repository.MakeUpTemplateCategoryImpl
+import com.iec.makeup.data.remote.repository.MakeUpTemplateRepositoryImpl
 import com.iec.makeup.data.remote.repository.MessageChatRemoteImpl
 import com.iec.makeup.data.repository.AuthRepository
 import com.iec.makeup.data.repository.AuthRepositoryImpl
+import com.iec.makeup.data.repository.MakeUpTemplateCategoryRepository
+import com.iec.makeup.data.repository.MakeUpTemplateRepository
 import com.iec.makeup.data.repository.MessageChatRepository
 import dagger.Binds
 import dagger.Module
@@ -99,6 +105,9 @@ class AppModule {
     }
 
 
+    /*
+     - Retrofit Module Injection
+     */
     @Provides
     @Singleton
     fun provideAuthEndpoint(@Named("NoAuth") retrofit: Retrofit): AuthEndpoint =
@@ -108,6 +117,16 @@ class AppModule {
     @Singleton
     fun provideUserEndpoint(@Named("Auth") retrofit: Retrofit): UserEndpoint =
         retrofit.create(UserEndpoint::class.java)
+
+    @Provides
+    @Singleton
+    fun provideMakeUpTempCategoryEndpoint(@Named("Auth") retrofit: Retrofit): MakeUpTempCategoryEndpoint =
+        retrofit.create(MakeUpTempCategoryEndpoint::class.java)
+
+    @Provides
+    @Singleton
+    fun provideMakeUpTemplateEndpoint(@Named("Auth") retrofit: Retrofit): MakeUpTemplateEndpoint =
+        retrofit.create(MakeUpTemplateEndpoint::class.java)
 
 }
 
@@ -123,4 +142,10 @@ abstract class ImplementationsModule {
 
     @Binds
     abstract fun bindMessageChatRepository(messageChatRepositoryImpl: MessageChatRemoteImpl): MessageChatRepository
+
+    @Binds
+    abstract fun bindMakeUpTemplateCategory(makeUpTemplateCategoryImpl: MakeUpTemplateCategoryImpl): MakeUpTemplateCategoryRepository
+
+    @Binds
+    abstract fun bindMakeUpTemplate(makeUpTemplateImpl: MakeUpTemplateRepositoryImpl): MakeUpTemplateRepository
 }

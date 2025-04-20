@@ -26,7 +26,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -41,7 +43,7 @@ import com.iec.makeup.ui.theme.ColorDB7093
 @Composable
 fun ScreenAllMakeupTemplateOfCategoryStateful(
     navBack: () -> Unit = {},
-    categoryID: String = "",
+    categoryID: List<String> = emptyList(),
     title: String = "Layout Dự tiệc",
     navToTemplateDetail: (String) -> Unit = {},
 ) {
@@ -55,7 +57,15 @@ fun ScreenAllMakeupTemplateOfCategoryStateful(
 
         }
     }
-
+    LaunchedEffect(Unit) {
+        viewModel.getInitialMakeUpTemplate(listOf(
+            "680109dc422dcdf6cbeadf6c",
+            "680109dc422dcdf6cbeadf6c",
+            "680109dc422dcdf6cbeadf6c",
+            "680109dc422dcdf6cbeadf6c",
+            "680109dc422dcdf6cbeadf6c"
+        ))
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -139,7 +149,7 @@ fun ScreenAllMakeupTemplateOfCategoryStateful(
 
 @Composable
 fun ScreenAllMakeupTemplateOfCategory(
-    data: List<MakeUpTemplateLayout> = mockMakeUpTemplateLayout,
+    data: List<MakeUpTemplateLayout>,
     onClick: (String) -> Unit = {}
 ) {
     LazyVerticalGrid(
@@ -148,12 +158,13 @@ fun ScreenAllMakeupTemplateOfCategory(
     ) {
         items(data.size) { index ->
             PhotoCard(
-                image = data[index].image,
-                isFavorite = data[index].isFavorite,
+                title = data[index].title ?: "",
+                image = data[index].thumbnail ?: "",
+                isFavorite = false,
                 modifier = Modifier
                     .padding(8.dp)
                     .fillMaxWidth()
-                    .clickable { onClick(data[index].id) }
+                    .clickable { onClick(data[index].id!!) }
             )
         }
     }
@@ -186,23 +197,33 @@ fun FilterButton(
 
 @Composable
 fun PhotoCard(
+    title: String,
     image: String,
     isFavorite: Boolean,
     modifier: Modifier = Modifier
 ) {
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(8.dp))
-            .height(180.dp)
-    ) {
-        // Replace with your actual image resource
-        AsyncImage(
-            model = image,
-            contentDescription = "Photo",
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
+    Column {
+        Box(
+            modifier = modifier
+                .clip(RoundedCornerShape(8.dp))
+                .height(180.dp)
+        ) {
+            // Replace with your actual image resource
+            AsyncImage(
+                model = "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80",
+                contentDescription = "Photo",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center,
+            overflow = TextOverflow.Ellipsis,
+            maxLines = 1
         )
-
     }
 }
 

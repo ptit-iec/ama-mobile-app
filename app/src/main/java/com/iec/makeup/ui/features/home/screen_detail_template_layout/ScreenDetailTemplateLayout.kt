@@ -18,6 +18,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.iec.makeup.R
 import com.iec.makeup.core.model.ui.MakeUpTemplateLayout
+import com.iec.makeup.core.model.ui.mockMakeUpTemplateLayout
 import com.iec.makeup.ui.theme.ColorDB7093
 
 
@@ -84,7 +85,7 @@ fun ScreenDetailTemplateLayout(
         }
         // --- Text Description ---
         Text(
-            text = item.prompt,
+            text = item.description ?: "",
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center, // Align text to the start
             modifier = Modifier.fillMaxWidth() // Take full width within the card padding
@@ -131,11 +132,6 @@ fun ScreenDetailTemplateLayout(
 @Composable
 private fun Preview() {
     ScreenDetailTemplateLayout(
-        item = MakeUpTemplateLayout(
-            "1",
-            "https://i.pinimg.com/736x/86/2f/31/862f310c3e879aefcbf50748758e32cc.jpg",
-            "Prompt 1",
-            false
-        )
+        item = mockMakeUpTemplateLayout[0]
     )
 }

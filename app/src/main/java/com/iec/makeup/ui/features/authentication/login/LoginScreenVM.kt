@@ -154,7 +154,7 @@ class LoginScreenVM @Inject constructor(
                         }
                     }
                 }
-//                delay(2000)
+//                delay(2000    )
 //                sendEventWithEffect(LoginScreenEvent.Login)
             } catch (e: Exception) {
                 errorArrived(e.toString())
