@@ -134,12 +134,10 @@ fun VirtualScreen(
     }
 
     LaunchedEffect(Unit) {
-        if (initialPrompts.isNotEmpty()) {
-            viewModel.onInitData(
-                randomList ?: emptyList(),
-                initialPrompts
-            )
-        }
+        viewModel.onInitData(
+            randomList ?: emptyList(),
+            initialPrompts
+        )
     }
     LaunchedEffect(effect) {
         effect.value?.let {
@@ -154,7 +152,6 @@ fun VirtualScreen(
         }
     }
     AIMakeupScreen(
-        initialPrompts,
         navInstruction,
         state = state.value,
         uploadImage = viewModel::uploadImage,
@@ -162,6 +159,7 @@ fun VirtualScreen(
         inputDescription = viewModel::inputDescription,
         launchCamera = { cameraLauncher.launch(uri) },
         deletePicture = viewModel::onDeleteImage,
+        randomPrompt = viewModel::onRandomPrompt
     )
     if (state.value.isLoading) {
         Box(
@@ -199,14 +197,14 @@ private fun AIPreview() {
 // Too lazy for separating these components :0
 @Composable
 fun AIMakeupScreen(
-    initialPrompts: String = "",
     navInstruction: () -> Unit = {},
     state: AIScreenState = AIScreenState(),
     uploadImage: (uri: Uri) -> Unit = {},
     deletePicture: () -> Unit = {},
     inputDescription: (description: String) -> Unit = {},
     onApply: (String) -> Unit = {},
-    launchCamera: () -> Unit = {}
+    launchCamera: () -> Unit = {},
+    randomPrompt: () -> Unit = {}
 ) {
 
     Box(
@@ -421,7 +419,9 @@ fun AIMakeupScreen(
                                     .padding(4.dp)
                             )
                             Row(
-                                modifier = Modifier.padding(horizontal = 8.dp),
+                                modifier = Modifier.padding(horizontal = 8.dp).clickable {
+                                    randomPrompt()
+                                },
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Icon(

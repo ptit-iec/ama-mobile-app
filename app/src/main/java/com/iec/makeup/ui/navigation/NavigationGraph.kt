@@ -1,6 +1,6 @@
 package com.iec.makeup.ui.navigation
 
-import android.util.Log
+import android.net.Uri
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.material3.Text
@@ -14,25 +14,24 @@ import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import com.example.iec.ui.feature.main.message.box_chat_message.ModernChatScreen
 import com.iec.makeup.core.model.ui.MakeUpTemplateLayout
-import com.iec.makeup.core.model.ui.mockMakeUpTemplateLayout
 import com.iec.makeup.ui.MakeupAppState
 import com.iec.makeup.ui.features.ai_makeup.InstructionScreen
 import com.iec.makeup.ui.features.ai_makeup.VirtualScreen
 import com.iec.makeup.ui.features.ai_makeup.screen_chat_with_ai.ScreenChatWithAI
-import com.iec.makeup.ui.features.ai_makeup.screen_response_ai.InteractionScreen
 import com.iec.makeup.ui.features.ai_makeup.screen_response_ai.InteractionScreenStateful
 import com.iec.makeup.ui.features.authentication.login.LoginScreen
 import com.iec.makeup.ui.features.authentication.register.RegisterScreen
 import com.iec.makeup.ui.features.authentication.third_party_auth.GoogleAuthLoadingScreen
 import com.iec.makeup.ui.features.home.HomeScreen
-import com.iec.makeup.ui.features.home.screen_notification.NotificationContent
-import com.iec.makeup.ui.features.home.screen_search.SearchScreen
 import com.iec.makeup.ui.features.home.screen_all_makeup.AllMakeUpScreen
 import com.iec.makeup.ui.features.home.screen_all_makeup_template.ScreenAllMakeupTemplateOfCategoryStateful
-import com.iec.makeup.ui.features.home.screen_detail_template_layout.ScreenDetailTemplateLayout
 import com.iec.makeup.ui.features.home.screen_detail_template_layout.ScreenDetailTemplateLayoutStateful
 import com.iec.makeup.ui.features.home.screen_makeup_info.ProfileScreen
+import com.iec.makeup.ui.features.home.screen_notification.NotificationContent
+import com.iec.makeup.ui.features.home.screen_search.SearchScreen
 import com.iec.makeup.ui.navigation.NavigationArguments.ARG_INITIAL_PROMPT
+import com.iec.makeup.ui.navigation.custom_nav_type.CustomNavType
+import kotlinx.serialization.json.Json
 
 
 object NavigationArguments {
@@ -261,32 +260,35 @@ fun NavigationGraph(
             composable(
                 route = Routes.MainAllMakeUpTemplate.route,
                 arguments = listOf(
-                    navArgument(Routes.MAKE_UP_CATEGORY_ID) { type = NavType.StringListType }
+                    navArgument(Routes.MAKE_UP_CATEGORY_ID) { type = NavType.StringType }
                 )
             ) {
                 appState.setVisibleBottomNav(true)
-                val idCategory = it.arguments?.getStringArrayList(Routes.MAKE_UP_CATEGORY_ID)?.toList() ?: emptyList()
+                val idCategory = it.arguments?.getString(Routes.MAKE_UP_CATEGORY_ID)?.split(",") ?: emptyList()
                 ScreenAllMakeupTemplateOfCategoryStateful(
                     navBack = {
                         navController.popBackStack()
                     },
-                    categoryID = idCategory as List<String>,
+                    categoryID = idCategory,
                     navToTemplateDetail = { id ->
-                        navController.navigate(Routes.MailDetailMakeUpTemplate.createRoute(id))
+                        navController.navigate(Routes.MailDetailMakeUpTemplate.createRoute(Uri.encode(id)))
                     }
                 )
             }
             composable(
                 route = Routes.MailDetailMakeUpTemplate.route,
                 arguments = listOf(
-                    navArgument(Routes.MAKE_UP_TEMPLATE_ID) { type = NavType.StringType }
+                    navArgument(Routes.MAKE_UP_TEMPLATE_ID) { type = CustomNavType.MakeUpTemplateLayoutNavType }
                 )
-            ) {
+            ) { it ->
                 appState.setVisibleBottomNav(true)
-                val idCategory = it.arguments?.getString(Routes.MAKE_UP_TEMPLATE_ID) ?: "0"
+                val idCategory = it.arguments?.getString(Routes.MAKE_UP_TEMPLATE_ID)
+                val makeUpLayout = idCategory?.let { layout ->
+                    Json.decodeFromString<MakeUpTemplateLayout>(layout)
+                }
                 // Pass id then query by this id, not pass the Item
                 ScreenDetailTemplateLayoutStateful(
-                    item = mockMakeUpTemplateLayout[0],
+                    item = makeUpLayout!!,
                     onApplyTemplate = {
                         navController.navigate(Routes.Page2.createRoute())
                     },

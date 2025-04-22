@@ -102,14 +102,13 @@ sealed class Routes(
 
     data object MainAllMakeUpTemplate :
         Routes("home/all_makeup_template/{${MAKE_UP_CATEGORY_ID}}") {
-        fun createRoute(makeupCategoryID: List<String>) = "home/all_makeup_template/$makeupCategoryID"
+        fun createRoute(makeupCategoryID: List<String>) = "home/all_makeup_template/${makeupCategoryID.joinToString(",")}"
 
     }
 
     data object MailDetailMakeUpTemplate :
         Routes("home/makeup_template_id/{${MAKE_UP_TEMPLATE_ID}}") {
         fun createRoute(makeupCategoryID: String) = "home/makeup_template_id/$makeupCategoryID"
-
     }
 
     /*

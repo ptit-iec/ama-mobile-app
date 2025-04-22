@@ -11,6 +11,7 @@ import com.iec.makeup.core.utils.Constants.TIME_OUT
 import com.iec.makeup.data.remote.api.AuthEndpoint
 import com.iec.makeup.data.remote.api.MakeUpTempCategoryEndpoint
 import com.iec.makeup.data.remote.api.MakeUpTemplateEndpoint
+import com.iec.makeup.data.remote.api.PromptEndpoint
 import com.iec.makeup.data.remote.api.UserEndpoint
 import com.iec.makeup.data.remote.repository.MakeUpTemplateCategoryImpl
 import com.iec.makeup.data.remote.repository.MakeUpTemplateRepositoryImpl
@@ -128,6 +129,10 @@ class AppModule {
     fun provideMakeUpTemplateEndpoint(@Named("Auth") retrofit: Retrofit): MakeUpTemplateEndpoint =
         retrofit.create(MakeUpTemplateEndpoint::class.java)
 
+    @Provides
+    @Singleton
+    fun providePromptEndpoint(@Named("Auth") retrofit: Retrofit): PromptEndpoint =
+        retrofit.create(PromptEndpoint::class.java)
 }
 
 @InstallIn(SingletonComponent::class)

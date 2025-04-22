@@ -2,8 +2,10 @@ package com.iec.makeup.ui.features.ai_makeup.business
 
 import android.net.Uri
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.iec.makeup.core.BaseViewModel
 import com.iec.makeup.core.Reducer
+import com.iec.makeup.data.remote.api.PromptEndpoint
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -71,6 +73,7 @@ class AIScreenReducer() : Reducer<AIScreenState, AIScreenEvent, AIScreenEffect> 
 
             is AIScreenEvent.OnInitData -> {
                 currentState.copy(
+                    isLoading = false,
                     randomList = event.data,
                     requestDescription = event.initPrompts
                 ) to null
@@ -82,7 +85,9 @@ class AIScreenReducer() : Reducer<AIScreenState, AIScreenEvent, AIScreenEffect> 
 
 
 @HiltViewModel
-class AIScreenVM @Inject constructor() :
+class AIScreenVM @Inject constructor(
+    private val promptEndpoint: PromptEndpoint
+) :
     BaseViewModel<AIScreenState, AIScreenEvent, AIScreenEffect>(
         initialState = AIScreenState(),
         reducer = AIScreenReducer()
@@ -123,6 +128,25 @@ class AIScreenVM @Inject constructor() :
     }
 
     fun onInitData(data: List<String>?, description: String) {
-        sendEvent(AIScreenEvent.OnInitData(data, description))
+        if(!data.isNullOrEmpty()) {
+            sendEvent(AIScreenEvent.OnInitData(data, description))
+        }else{
+            viewModelScope.launch {
+                sendEvent(AIScreenEvent.OnLoading(true))
+                val result = promptEndpoint.getAllPrompt()
+                if (result.success == true) {
+                    sendEvent(AIScreenEvent.OnInitData(result.data?.map { it.content ?: "" }, description))
+                }
+            }
+        }
+    }
+
+    fun onRandomPrompt(){
+        val data = state.value.randomList
+        if(!data.isNullOrEmpty()){
+            val randomPrompt = state.value.randomList!!.random()
+            sendEvent(AIScreenEvent.OnRequestDescription(randomPrompt))
+
+        }
     }
 }

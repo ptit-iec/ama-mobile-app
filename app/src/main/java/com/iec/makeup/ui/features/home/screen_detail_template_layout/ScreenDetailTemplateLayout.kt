@@ -16,6 +16,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.iec.makeup.R
 import com.iec.makeup.core.model.ui.MakeUpTemplateLayout
 import com.iec.makeup.core.model.ui.mockMakeUpTemplateLayout
@@ -74,13 +75,12 @@ fun ScreenDetailTemplateLayout(
             elevation = CardDefaults.cardElevation(4.dp),
             modifier = Modifier.aspectRatio(1f)
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.pick1), // <<--- REPLACE with your image resource
+            AsyncImage(
+                model = item.thumbnail,
                 contentDescription = "Profile Image",
                 contentScale = ContentScale.Crop, // Crop to fit bounds
                 modifier = Modifier
-                    .fillMaxSize()
-                    .clip(RoundedCornerShape(12.dp)) // Rounded corners for the image
+                    .aspectRatio(1f)
             )
         }
         // --- Text Description ---

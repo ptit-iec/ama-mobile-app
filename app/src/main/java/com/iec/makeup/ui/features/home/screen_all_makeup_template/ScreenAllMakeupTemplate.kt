@@ -33,12 +33,15 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import com.iec.makeup.R
 import com.iec.makeup.core.model.ui.MakeUpTemplateLayout
 import com.iec.makeup.core.model.ui.mockMakeUpTemplateLayout
 import com.iec.makeup.core.ui.AtomicLoadingDialog
 import com.iec.makeup.ui.features.home.screen_all_makeup_template.viewmodel.ScreenAllMakeUpTemplateEffect
 import com.iec.makeup.ui.features.home.screen_all_makeup_template.viewmodel.ScreenAllMakeupTemplateVM
 import com.iec.makeup.ui.theme.ColorDB7093
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 @Composable
 fun ScreenAllMakeupTemplateOfCategoryStateful(
@@ -58,13 +61,7 @@ fun ScreenAllMakeupTemplateOfCategoryStateful(
         }
     }
     LaunchedEffect(Unit) {
-        viewModel.getInitialMakeUpTemplate(listOf(
-            "680109dc422dcdf6cbeadf6c",
-            "680109dc422dcdf6cbeadf6c",
-            "680109dc422dcdf6cbeadf6c",
-            "680109dc422dcdf6cbeadf6c",
-            "680109dc422dcdf6cbeadf6c"
-        ))
+        viewModel.getInitialMakeUpTemplate(categoryID)
     }
     Column(
         modifier = Modifier
@@ -153,8 +150,9 @@ fun ScreenAllMakeupTemplateOfCategory(
     onClick: (String) -> Unit = {}
 ) {
     LazyVerticalGrid(
-        columns = GridCells.Fixed(3),
-        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+        columns = GridCells.Fixed(2),
+        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(data.size) { index ->
             PhotoCard(
@@ -164,7 +162,7 @@ fun ScreenAllMakeupTemplateOfCategory(
                 modifier = Modifier
                     .padding(8.dp)
                     .fillMaxWidth()
-                    .clickable { onClick(data[index].id!!) }
+                    .clickable { onClick(Json.encodeToString(data[index])) }
             )
         }
     }
@@ -206,11 +204,13 @@ fun PhotoCard(
         Box(
             modifier = modifier
                 .clip(RoundedCornerShape(8.dp))
+                .width(100.dp)
                 .height(180.dp)
         ) {
             // Replace with your actual image resource
             AsyncImage(
-                model = "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80",
+                model = image,
+                error = painterResource(R.drawable.internet),
                 contentDescription = "Photo",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
@@ -219,7 +219,7 @@ fun PhotoCard(
         Text(
             text = title,
             style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
             textAlign = TextAlign.Center,
             overflow = TextOverflow.Ellipsis,
             maxLines = 1

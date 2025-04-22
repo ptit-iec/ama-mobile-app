@@ -13,6 +13,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -39,7 +40,8 @@ fun MakeUpStyleLayout(
         ) {
             AsyncImage(
                 model = item.image,
-                contentDescription = null
+                contentDescription = null,
+                contentScale = ContentScale.FillBounds
             )
         }
         Spacer(modifier = Modifier.size(2.dp))
