@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.Color
 val ColorFFC1CC = Color(0xFFFFC1CC)// Light Pink
 val ColorFFE4E1 = Color(0xFFFFE4E1) // Misty Rose
 val ColorFFF0F5 = Color(0xFFFFF0F5) // Lavender Blush
+val ColorFAF9F9 = Color(0xFFFAF9F9) // Light Gray
 val ColorFF69B4 = Color(0xFFFF69B4) // Hot Pink
 val ColorDB7093 = Color(0xFFDB7093) // Pale Violet Red
 val Color33FF69B4 = Color(0x33FF69B4)

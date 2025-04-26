@@ -32,15 +32,15 @@ enum class TopLevelDestination(
         route = Routes.MainHome.createRoute()
     ),
     Page2(
-        selectedIcon = R.drawable.lens_blur_24dp_df9d9b_fill0_wght400_grad0_opsz24,
-        unSelectedIcon = R.drawable.lens_blur_24dp_df9d9b_fill0_wght400_grad0_opsz24,
+        selectedIcon = R.drawable.ai,
+        unSelectedIcon = R.drawable.ai,
         iconText = R.string.page2,
         titleTextId = R.string.page2_title,
         route = Routes.Page2.createRoute()
     ),
     Page3(
-        selectedIcon = R.drawable.shopping_cart_24dp_df9d9b_fill1_wght400_grad0_opsz24,
-        unSelectedIcon = R.drawable.shopping_cart_24dp_df9d9b_fill0_wght400_grad0_opsz24,
+        selectedIcon = R.drawable.hume,
+        unSelectedIcon = R.drawable.hume,
         iconText = R.string.page3,
         titleTextId = R.string.page3_title,
         route = Routes.Page3.createRoute()
@@ -101,8 +101,8 @@ sealed class Routes(
     }
 
     data object MainAllMakeUpTemplate :
-        Routes("home/all_makeup_template/{${MAKE_UP_CATEGORY_ID}}") {
-        fun createRoute(makeupCategoryID: List<String>) = "home/all_makeup_template/${makeupCategoryID.joinToString(",")}"
+        Routes("home/all_makeup_template/{$MAKE_UP_TITLE_ID}/{${MAKE_UP_CATEGORY_ID}}") {
+        fun createRoute(title: String, makeupCategoryID: List<String>) = "home/all_makeup_template/$title/${makeupCategoryID.joinToString(",")}"
 
     }
 
@@ -145,6 +145,7 @@ sealed class Routes(
     companion object {
         const val MAKE_UP_STYLIST_ID = "makeup_stylist_id"
         const val MAKE_UP_CATEGORY_ID = "makeup_category_id"
+        const val MAKE_UP_TITLE_ID = "makeup_title_id"
         const val MAKE_UP_TEMPLATE_ID = "makeup_template_id"
     }
 }

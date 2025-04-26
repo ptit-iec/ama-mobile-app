@@ -32,6 +32,7 @@ import com.iec.makeup.ui.features.home.screen_search.SearchScreen
 import com.iec.makeup.ui.navigation.NavigationArguments.ARG_INITIAL_PROMPT
 import com.iec.makeup.ui.navigation.custom_nav_type.CustomNavType
 import kotlinx.serialization.json.Json
+import okhttp3.Route
 
 
 object NavigationArguments {
@@ -135,37 +136,43 @@ fun NavigationGraph(
                     navToNotification = {
                         navController.navigate(Routes.MainNotification.createRoute()) {
                             launchSingleTop = true
-                            restoreState = false
+                            restoreState = true
                         }
                     },
                     navToSearch = {
                         navController.navigate(Routes.MainSearch.createRoute()) {
                             launchSingleTop = true
-                            restoreState = false
+                            restoreState = true
                         }
                     },
                     navToAllMakeUpArtist = {
                         navController.navigate(Routes.MainAllMakeUp.createRoute()) {
                             launchSingleTop = true
-                            restoreState = false
+                            restoreState = true
                         }
                     },
                     navToPersonalInfo = { id ->
                         navController.navigate(Routes.MainDetailMakeUp.createRoute(id)) {
                             launchSingleTop = true
-                            restoreState = false
+                            restoreState = true
                         }
                     },
                     navToChatting = {
                         navController.navigate(Routes.MainChatting.createRoute("0")) {
                             launchSingleTop = true
-                            restoreState = false
+                            restoreState = true
                         }
                     },
-                    navToAllTemplate = {
-                        navController.navigate(Routes.MainAllMakeUpTemplate.createRoute(it)) {
+                    navToAllTemplate = { title, it ->
+                        navController.navigate(Routes.MainAllMakeUpTemplate.createRoute(title, it)) {
                             launchSingleTop = true
-                            restoreState = false
+                            restoreState = true
+                        }
+                    },
+                    navToAI = {
+                        navController.navigate(Routes.Page2.createRoute()) {
+                            launchSingleTop = false
+                            restoreState = true
                         }
                     }
                 )
@@ -260,7 +267,8 @@ fun NavigationGraph(
             composable(
                 route = Routes.MainAllMakeUpTemplate.route,
                 arguments = listOf(
-                    navArgument(Routes.MAKE_UP_CATEGORY_ID) { type = NavType.StringType }
+                    navArgument(Routes.MAKE_UP_CATEGORY_ID) { type = NavType.StringType },
+                    navArgument(Routes.MAKE_UP_TITLE_ID) { type = NavType.StringType }
                 )
             ) {
                 appState.setVisibleBottomNav(true)
@@ -272,7 +280,8 @@ fun NavigationGraph(
                     categoryID = idCategory,
                     navToTemplateDetail = { id ->
                         navController.navigate(Routes.MailDetailMakeUpTemplate.createRoute(Uri.encode(id)))
-                    }
+                    },
+                    title = it.arguments?.getString(Routes.MAKE_UP_TITLE_ID) ?: "Dự tiệc"
                 )
             }
             composable(

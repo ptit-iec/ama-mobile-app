@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -27,8 +28,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.RemoveRedEye
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -57,10 +60,12 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -72,6 +77,7 @@ import com.iec.makeup.core.ui.AtomicLoadingDialog
 import com.iec.makeup.core.ui.DialogCompose
 import com.iec.makeup.core.utils.Constants.BASE_URL
 import com.iec.makeup.core.utils.validatesEmailPattern
+import com.iec.makeup.ui.LocalAppState
 import com.iec.makeup.ui.theme.Color33FF69B4
 import com.iec.makeup.ui.theme.ColorDB7093
 import com.iec.makeup.ui.theme.ColorFF69B4
@@ -90,6 +96,7 @@ fun LoginScreen(
     navToRegister: () -> Unit = {},
     navToHome: () -> Unit = {}
 ) {
+    val appState = LocalAppState.current
     val viewModel: LoginScreenVM = hiltViewModel()
     val screenState = viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -112,7 +119,7 @@ fun LoginScreen(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        LoginScreenStateful(
+        LoginScreenWithGoogle(
             state = screenState.value,
             doLogin = { viewModel.doLogin() },
             inputUserName = { viewModel.inputUsername(it) },
@@ -131,27 +138,7 @@ fun LoginScreen(
             positiveAction = { viewModel.errorDismiss() }
         )
     }
-    AnimatedVisibility(
-        visible = screenState.value.isLoading,
-        modifier = Modifier
-            .fillMaxSize()
-            .clickable { },
-        enter = slideInVertically(
-            initialOffsetY = { fullHeight -> -fullHeight },
-        ) + fadeIn(),
-        exit = slideOutVertically(
-            targetOffsetY = { fullHeight -> -fullHeight },
-        ) + fadeOut(),
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(color = Color.Black.copy(alpha = 0.8f)),
-            contentAlignment = Alignment.Center
-        ) {
-            AtomicLoadingDialog()
-        }
-    }
+    appState.setLoading(screenState.value.isLoading)
 
 }
 
@@ -418,10 +405,219 @@ fun LoginScreenStateful(
     }
 }
 
+
+// Version 1 accept only account verify through google.
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun LoginScreenWithGoogle(
+    state: LoginScreenState = LoginScreenState(false, false, null, null),
+    doLogin: () -> Unit = {},
+    inputUserName: (String) -> Unit = {},
+    inputPassword: (String) -> Unit = {},
+    showError: (String) -> Unit = {},
+    navToRegister: () -> Unit = {},
+    navToHome: () -> Unit = {},
+    openGoogleSignIn: () -> Unit = {}
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFFFF7470), // Light Pink
+                        ColorFFE4E1, // Misty Rose
+                        ColorFFF0F5 // Lavender Blush
+                    )
+                )
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 32.dp, vertical = 16.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+            ) {
+                // Header
+                Text(
+                    text = "AI MAKEUP",
+                    color = Color.White,
+                    fontSize = 30.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp)
+                )
+
+                Text(
+                    text = "Biến bạn trở thành phiên bản xinh đẹp nhất",
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(bottom = 24.dp)
+                )
+
+                // Navigation items in a row
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    // Instructions column
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Image(
+                            painter = painterResource(R.drawable.manual),
+                            contentDescription = "Instructions",
+                            modifier = Modifier.size(36.dp),
+                        )
+                        Text(
+                            text = stringResource(R.string.instructions),
+                            color = Color.White,
+                            fontSize = 16.sp,
+                            overflow = TextOverflow.Visible,
+                            modifier = Modifier.width(100.dp),
+                            textAlign = TextAlign.Center
+                        )
+                    }
+
+                    // Calendar column
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Image(
+                            painter = painterResource(R.drawable.event__1_),
+                            contentDescription = "Instructions",
+                            modifier = Modifier.size(36.dp)
+                        )
+                        Text(
+                            text = stringResource(R.string.booking),
+                            color = Color.White,
+                            fontSize = 16.sp,
+                            overflow = TextOverflow.Visible,
+                            modifier = Modifier.width(100.dp),
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Image(
+                    painter = painterResource(R.drawable.image_86),
+                    contentDescription = "Bad design Fuk",
+                    modifier = Modifier.size(240.dp).align(Alignment.CenterHorizontally)
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+// Navigation items in a row
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    // Instructions column
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Image(
+                            painter = painterResource(R.drawable.idea),
+                            contentDescription = "Instructions",
+                            modifier = Modifier.size(36.dp)
+                        )
+                        Text(
+                            text = stringResource(R.string.recommend_makeup),
+                            color = ColorDB7093,
+                            fontSize = 16.sp,
+                            overflow = TextOverflow.Visible,
+                            modifier = Modifier.width(100.dp),
+                            textAlign = TextAlign.Center
+                        )
+                    }
+
+                    // Calendar column
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Image(
+                            painter = painterResource(R.drawable.text_message),
+                            contentDescription = "Instructions",
+                            modifier = Modifier.size(36.dp)
+                        )
+                        Text(
+                            text = stringResource(R.string.chat_with_ai),
+                            color = ColorDB7093,
+                            fontSize = 16.sp,
+                            overflow = TextOverflow.Visible,
+                            modifier = Modifier.width(100.dp),
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp, horizontal = 12.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.White
+                    )
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .clickable {
+                                openGoogleSignIn()
+                            }
+                    ) {
+                        Image(
+                            painter = painterResource(R.drawable.google),
+                            contentDescription = "Google",
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .size(24.dp)
+                        )
+                        Text(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .align(Alignment.Center),
+                            text = "Đăng nhập với Google",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            }
+
+            // Decorative Element
+            Box(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .size(100.dp)
+                    .background(
+                        color = Color33FF69B4,
+                        shape = CircleShape
+                    )
+            )
+
+
+        }
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
 fun LoginScreenPreview() {
-    LoginScreenStateful(
+    LoginScreenWithGoogle(
 
     )
 }

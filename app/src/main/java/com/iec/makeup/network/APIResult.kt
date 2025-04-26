@@ -15,3 +15,19 @@ data class APIResult<T>(
     @SerializedName("data")
     val data: T? = null
 )
+
+
+@Serializable
+data class APIResultPaging<T>(
+    @SerializedName("status")
+    val status: Int,
+    @SerializedName("success")
+    val success: Boolean?,
+    @SerializedName("message")
+    val message: String?,
+    @SerializedName("data")
+    val data: T? = null,
+    @SerializedName("pagination")
+    val pagination: Pagination? = null
+
+)

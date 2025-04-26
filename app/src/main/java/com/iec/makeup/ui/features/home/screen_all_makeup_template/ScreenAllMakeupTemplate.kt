@@ -37,7 +37,9 @@ import com.iec.makeup.R
 import com.iec.makeup.core.model.ui.MakeUpTemplateLayout
 import com.iec.makeup.core.model.ui.mockMakeUpTemplateLayout
 import com.iec.makeup.core.ui.AtomicLoadingDialog
+import com.iec.makeup.ui.LocalAppState
 import com.iec.makeup.ui.features.home.screen_all_makeup_template.viewmodel.ScreenAllMakeUpTemplateEffect
+import com.iec.makeup.ui.features.home.screen_all_makeup_template.viewmodel.ScreenAllMakeUpTemplateViewState
 import com.iec.makeup.ui.features.home.screen_all_makeup_template.viewmodel.ScreenAllMakeupTemplateVM
 import com.iec.makeup.ui.theme.ColorDB7093
 import kotlinx.serialization.encodeToString
@@ -51,18 +53,32 @@ fun ScreenAllMakeupTemplateOfCategoryStateful(
     navToTemplateDetail: (String) -> Unit = {},
 ) {
 
+    val appState = LocalAppState.current
     val viewModel: ScreenAllMakeupTemplateVM = hiltViewModel()
     val state = viewModel.state.collectAsStateWithLifecycle()
     val effect = viewModel.effect.collectAsState(initial = null)
 
-    LaunchedEffect(key1 = effect.value) {
-        if (effect.value is ScreenAllMakeUpTemplateEffect.Error) {
-
-        }
-    }
     LaunchedEffect(Unit) {
         viewModel.getInitialMakeUpTemplate(categoryID)
     }
+    ScreenAllMakeupTemplateOfCategoryStateless(
+        navBack = navBack,
+        state = state.value,
+        navToTemplateDetail = navToTemplateDetail,
+        layout = title
+    )
+
+    appState.setLoading(state.value.isLoading)
+
+}
+
+@Composable
+fun ScreenAllMakeupTemplateOfCategoryStateless(
+    navBack: () -> Unit = {},
+    state: ScreenAllMakeUpTemplateViewState = ScreenAllMakeUpTemplateViewState(),
+    navToTemplateDetail: (String) -> Unit = {},
+    layout: String = "Dự tiệc"
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -73,6 +89,7 @@ fun ScreenAllMakeupTemplateOfCategoryStateful(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
+                .height(80.dp)
                 .background(
                     brush = Brush.verticalGradient(
                         colors = listOf(
@@ -81,7 +98,7 @@ fun ScreenAllMakeupTemplateOfCategoryStateful(
                         )
                     ),
                 )
-                .padding(16.dp)
+                .padding(16.dp),
         ) {
             Icon(
                 imageVector = Icons.Default.ArrowBack,
@@ -93,56 +110,21 @@ fun ScreenAllMakeupTemplateOfCategoryStateful(
                         navBack()
                     }
             )
-            Spacer(modifier = Modifier.width(16.dp))
-            Column(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = title,
-                    color = Color.White,
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    FilterButton(
-                        text = "Tất cả",
-                        selected = true,
-                        modifier = Modifier.weight(1f)
-                    )
-                    FilterButton(
-                        text = "Yêu thích",
-                        selected = false,
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-            }
+            Text(
+                text = layout,
+                style = MaterialTheme.typography.titleLarge,
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.align(Alignment.Center)
+            )
         }
 
         ScreenAllMakeupTemplateOfCategory(
-            data = state.value.data,
+            data = state.data,
             onClick = { templateID: String -> navToTemplateDetail(templateID) }
         )
     }
-
-    if (state.value.isLoading) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White.copy(alpha = 0.5f)),
-            contentAlignment = Alignment.Center
-        ) {
-            AtomicLoadingDialog()
-        }
-    }
 }
-
 
 @Composable
 fun ScreenAllMakeupTemplateOfCategory(
@@ -219,7 +201,9 @@ fun PhotoCard(
         Text(
             text = title,
             style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 4.dp),
             textAlign = TextAlign.Center,
             overflow = TextOverflow.Ellipsis,
             maxLines = 1
@@ -230,5 +214,5 @@ fun PhotoCard(
 @Preview
 @Composable
 fun RoundedCardPreview() {
-    ScreenAllMakeupTemplateOfCategoryStateful()
+    ScreenAllMakeupTemplateOfCategoryStateless()
 }

@@ -1,5 +1,6 @@
 package com.iec.makeup.ui.features.home.screen_all_makeup.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -15,6 +16,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.FilterAlt
+import androidx.compose.material.icons.outlined.FilterList
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,7 +44,7 @@ fun SearchBar(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(color = ColorFFF0F5)
+            .background(color = Color.White)
             .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
@@ -50,7 +52,7 @@ fun SearchBar(
         Icon(
             imageVector = Icons.Default.ArrowBackIosNew,
             contentDescription = "Back",
-            tint = DarkBackground,
+            tint = ColorDB7093,
             modifier = Modifier
                 .padding(8.dp)
                 .size(22.dp)
@@ -61,9 +63,10 @@ fun SearchBar(
         Card(
             modifier = Modifier
                 .height(40.dp)
-                .width(320.dp),
+                .width(300.dp),
             shape = RoundedCornerShape(8.dp),
-            backgroundColor = Color.White
+            backgroundColor = Color.White,
+            border = BorderStroke(1.dp, ColorDB7093)
         ) {
             IECTextField(
                 placeholder = "Search ...",
@@ -75,12 +78,12 @@ fun SearchBar(
             )
         }
         Icon(
-            imageVector = Icons.Default.FilterAlt,
+            imageVector = Icons.Outlined.FilterList,
             contentDescription = "Filter",
-            tint = DarkBackground,
+            tint = ColorDB7093,
             modifier = Modifier
                 .padding(8.dp)
-                .size(22.dp)
+                .size(24.dp)
                 .clickable {
                     onFilterClick()
                 },
@@ -89,7 +92,7 @@ fun SearchBar(
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
+@Preview(showBackground = true)
 @Composable
 private fun SearchBarPreview() {
     SearchBar()

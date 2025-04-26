@@ -9,15 +9,18 @@ import com.iec.makeup.core.network.TokenManager
 import com.iec.makeup.core.utils.Constants.BASE_URL
 import com.iec.makeup.core.utils.Constants.TIME_OUT
 import com.iec.makeup.data.remote.api.AuthEndpoint
+import com.iec.makeup.data.remote.api.ExpertEndpoint
 import com.iec.makeup.data.remote.api.MakeUpTempCategoryEndpoint
 import com.iec.makeup.data.remote.api.MakeUpTemplateEndpoint
 import com.iec.makeup.data.remote.api.PromptEndpoint
 import com.iec.makeup.data.remote.api.UserEndpoint
+import com.iec.makeup.data.remote.repository.ExpertRepositoryImpl
 import com.iec.makeup.data.remote.repository.MakeUpTemplateCategoryImpl
 import com.iec.makeup.data.remote.repository.MakeUpTemplateRepositoryImpl
 import com.iec.makeup.data.remote.repository.MessageChatRemoteImpl
 import com.iec.makeup.data.repository.AuthRepository
 import com.iec.makeup.data.repository.AuthRepositoryImpl
+import com.iec.makeup.data.repository.ExpertRepository
 import com.iec.makeup.data.repository.MakeUpTemplateCategoryRepository
 import com.iec.makeup.data.repository.MakeUpTemplateRepository
 import com.iec.makeup.data.repository.MessageChatRepository
@@ -133,6 +136,12 @@ class AppModule {
     @Singleton
     fun providePromptEndpoint(@Named("Auth") retrofit: Retrofit): PromptEndpoint =
         retrofit.create(PromptEndpoint::class.java)
+
+
+    @Provides
+    @Singleton
+    fun provideExpertEndpoint(@Named("Auth") retrofit: Retrofit): ExpertEndpoint =
+        retrofit.create(ExpertEndpoint::class.java)
 }
 
 @InstallIn(SingletonComponent::class)
@@ -153,4 +162,7 @@ abstract class ImplementationsModule {
 
     @Binds
     abstract fun bindMakeUpTemplate(makeUpTemplateImpl: MakeUpTemplateRepositoryImpl): MakeUpTemplateRepository
+
+    @Binds
+    abstract fun bindExpertRepo(expertRepositoryImpl: ExpertRepositoryImpl): ExpertRepository
 }
