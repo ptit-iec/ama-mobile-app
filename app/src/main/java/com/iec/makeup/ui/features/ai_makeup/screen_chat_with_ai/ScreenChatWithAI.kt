@@ -71,6 +71,7 @@ fun ScreenChatWithAI(
     navToExpertsRcm: (String) -> Unit = {},
     viewModel: ScreenChatWithAIVM
 ) {
+
     var imageFullView by remember { mutableStateOf<String?>(null) }
     val state = viewModel.state.collectAsStateWithLifecycle()
     val effect = viewModel.effect.collectAsStateWithLifecycle(initialValue = null)
@@ -247,11 +248,12 @@ fun ScreenChatStateless(
                     onMessageChange(it)
                 },
                 onMessageSent = {
-                    if (state.messages.isEmpty()) {
-                        onInitMessageSent()
-                    } else {
-                        onMessageSent()
-                    }
+                    onInitMessageSent()
+//                    if (state.messages.size < 2) {
+//                        onInitMessageSent()
+//                    } else {
+//                        onMessageSent()
+//                    }
                 }
             )
         }
