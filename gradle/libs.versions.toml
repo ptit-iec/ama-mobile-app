@@ -5,6 +5,7 @@ biometric = "1.2.0-alpha05"
 browser = "1.8.0"
 coilCompose = "2.7.0"
 coilNetworkOkhttp = "3.0.4"
+composeMarkdown = "0.5.7"
 constraintlayoutComposeAndroid = "1.1.0"
 constraintlayoutVersion = "2.2.1"
 converterGson = "2.9.0"
@@ -81,6 +82,7 @@ androidx-material-icons-extended = { module = "androidx.compose.material:materia
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilNetworkOkhttp" }
 coil-kt-coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coilNetworkOkhttp" }
+compose-markdown = { module = "com.github.jeziellago:compose-markdown", version.ref = "composeMarkdown" }
 converter-gson-v290 = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }

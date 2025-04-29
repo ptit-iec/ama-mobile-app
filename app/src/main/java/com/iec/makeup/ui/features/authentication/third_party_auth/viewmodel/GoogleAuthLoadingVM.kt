@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.iec.makeup.core.DataStoreInterface
 import com.iec.makeup.core.PersistentState
 import com.iec.makeup.core.PreferenceKeys
+import com.iec.makeup.core.network.TokenManager
 import com.iec.makeup.core.utils.fromJson
 import com.iec.makeup.data.remote.api.AuthEndpoint
 import com.iec.makeup.data.remote.api.UserEndpoint
@@ -30,7 +31,8 @@ data class GoogleAuthLoadingState(
 @HiltViewModel
 class GoogleAuthLoadingVM @Inject constructor(
     private val dataStore: DataStoreInterface,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val tokenManager: TokenManager
 ) : ViewModel() {
     private var _state = MutableStateFlow(GoogleAuthLoadingState())
     var state = _state.asStateFlow()
@@ -51,8 +53,7 @@ class GoogleAuthLoadingVM @Inject constructor(
                     val result =
                         authRepository.doGoogleLogin(code)
                     if (result.isSuccessful) {
-                        dataStore.saveKey(
-                            PreferenceKeys.USER_TOKEN,
+                        tokenManager.setToken(
                             result.body()!!.data?.accessToken ?: ""
                         )
                         _state.value = _state.value.copy(

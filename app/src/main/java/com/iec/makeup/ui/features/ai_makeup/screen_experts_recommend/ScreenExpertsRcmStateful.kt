@@ -1,11 +1,7 @@
-package com.iec.makeup.ui.features.home.screen_all_makeup
+package com.iec.makeup.ui.features.ai_makeup.screen_experts_recommend
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -15,7 +11,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -25,25 +20,23 @@ import com.iec.makeup.core.model.ui.Expert
 import com.iec.makeup.data.remote.dto.Rating
 import com.iec.makeup.ui.LocalAppState
 import com.iec.makeup.ui.features.ai_makeup.screen_experts_recommend.components.MakeUpItemCard
-import com.iec.makeup.ui.features.home.screen_all_makeup.components.ExpertDetail
-import com.iec.makeup.ui.features.home.screen_all_makeup.components.SearchBar
-import com.iec.makeup.ui.theme.ColorDB7093
-import com.iec.makeup.ui.theme.ColorFAF9F9
+import com.iec.makeup.ui.features.ai_makeup.screen_experts_recommend.components.SearchBar
 
 
 @Composable
-fun AllMakeUpScreen(
+fun ScreenExpertsRcmStateful(
+    questionId: String = "",
     navBack: () -> Unit = {},
     navToDetail: (String) -> Unit = {}
 ) {
-    val viewModel: AllMakeUpVM = hiltViewModel()
+    val viewModel: ScreenExpertsRcmVM = hiltViewModel()
     val context = LocalContext.current
     val appState = LocalAppState.current
     val state = viewModel.state.collectAsStateWithLifecycle()
     val effect = viewModel.effect.collectAsStateWithLifecycle(initialValue = null)
 
 
-    AllMakeUpScreenStateless(
+    ScreenExpertsRcmStateless(
         navBack = navBack,
         navToDetail = navToDetail,
         data = state.value.data,
@@ -54,7 +47,7 @@ fun AllMakeUpScreen(
 }
 
 @Composable
-fun AllMakeUpScreenStateless(
+fun ScreenExpertsRcmStateless(
     navBack: () -> Unit = {},
     navToDetail: (String) -> Unit = {},
     data: List<Expert> = emptyList(),
@@ -73,44 +66,28 @@ fun AllMakeUpScreenStateless(
             }
         }
     }
-    Box(
-        modifier = Modifier.fillMaxSize()
-    ){
-        Box(
-            modifier = Modifier
-                .height(200.dp)
-                .fillMaxWidth()
-                .background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            ColorDB7093,
-                            ColorFAF9F9
-                        )
-                    ),
-                )
-        )
-        Column(
-            modifier = Modifier.fillMaxWidth()
-        ) {
+    Scaffold(
+        topBar = {
             SearchBar(
                 onBackClick = navBack
             )
-            Box(
-                modifier = Modifier.padding(16.dp)
+        }
+    ) { padding ->
+        Box(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            LazyColumn(
+                state = scrollState,
             ) {
-                LazyColumn(
-                    state = scrollState,
-                ) {
-                    items(data.size) { index ->
-                        val item = data[index]
-                        ExpertDetail(
-                            item = item,
-                            onBookNowClick = { /* Handle book now click */ },
-                            onNavToDetail = navToDetail
-                        )
+                items(data.size) { index ->
+                    val item = data[index]
+                    MakeUpItemCard(
+                        item = item,
+                        onBookNowClick = { /* Handle book now click */ },
+                        onNavToDetail = navToDetail
+                    )
 
-                        Spacer(modifier = Modifier.height(4.dp))
-                    }
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
         }
@@ -120,7 +97,7 @@ fun AllMakeUpScreenStateless(
 @Preview
 @Composable
 private fun Preview() {
-    AllMakeUpScreenStateless(
+    ScreenExpertsRcmStateless(
         data = listOf(
             Expert(
                 name = "Dr. Arlene McCoy",

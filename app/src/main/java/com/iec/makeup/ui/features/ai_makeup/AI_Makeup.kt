@@ -88,7 +88,7 @@ fun VirtualScreen(
     initialPrompts: String = "",
     randomList: List<String>? = null,
     navInstruction: () -> Unit = {},
-    navInteraction: (String) -> Unit = {}
+    navInteraction: (String, String, String) -> Unit = { _, _, _ -> }
 ) {
     val context = LocalContext.current
     val viewModel: AIScreenVM = hiltViewModel()
@@ -166,13 +166,19 @@ fun VirtualScreen(
         uploadImage = {
             pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
         },
-        onApply = navInteraction,
+        onApply = {
+            viewModel.submitImageToServer(state.value.imageURL)
+            {
+                navInteraction(state.value.requestDescription ?: "", Uri.encode(it) ?: "", "6802056530135d4049a8a6d4")
+            }
+        },
         inputDescription = viewModel::inputDescription,
         launchCamera = { cameraLauncher.launch(uri) },
         deletePicture = viewModel::onDeleteImage,
         randomPrompt = viewModel::onRandomPrompt
     )
     appState.setLoading(state.value.isLoading)
+
     if (errorMessage != null) {
         Box(
             modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center

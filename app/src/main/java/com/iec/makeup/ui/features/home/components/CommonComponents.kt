@@ -218,15 +218,6 @@ fun StunningRoundedCard(
         ),
         border = BorderStroke(1.dp, ColorDB7093)
     ) {
-//                        AsyncImage(
-//                    modifier = Modifier.fillMaxWidth(),
-//                    contentScale = ContentScale.Crop,
-//                    model = imageURL,
-//                    contentDescription = "",
-//                    placeholder = painterResource(id = R.drawable.pick1_edit),
-//                    onLoading = {
-//                    }
-//                )
 
         Box(
             modifier = Modifier.fillMaxSize(),

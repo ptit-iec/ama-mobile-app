@@ -1,4 +1,4 @@
-package com.iec.makeup.data.remote.repository
+package com.iec.makeup.data.repository_implement
 
 import com.iec.makeup.data.remote.api.MakeUpTempCategoryEndpoint
 import com.iec.makeup.data.remote.dto.MakeUpTemplateCategoryDTO

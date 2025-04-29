@@ -38,19 +38,12 @@ enum class TopLevelDestination(
         titleTextId = R.string.page2_title,
         route = Routes.Page2.createRoute()
     ),
-    Page3(
-        selectedIcon = R.drawable.hume,
-        unSelectedIcon = R.drawable.hume,
-        iconText = R.string.page3,
-        titleTextId = R.string.page3_title,
-        route = Routes.Page3.createRoute()
-    ),
     Page4(
         selectedIcon = R.drawable.account_circle_24dp_df9d9b_fill1_wght400_grad0_opsz24,
         unSelectedIcon = R.drawable.account_circle_24dp_df9d9b_fill0_wght400_grad0_opsz24,
         iconText = R.string.page4,
         titleTextId = R.string.page4_title,
-        route = Routes.Page4.createRoute()
+        route = Routes.ScreenUserProfile.createRoute()
     )
 
 }
@@ -111,6 +104,7 @@ sealed class Routes(
         fun createRoute(makeupCategoryID: String) = "home/makeup_template_id/$makeupCategoryID"
     }
 
+    // ----------------------------------------------------------------------------
     /*
     -- Route /main/ai --
      */
@@ -122,23 +116,35 @@ sealed class Routes(
         fun createRoute() = "analyze/instruction"
     }
 
-    data object ScreenChatWithAIRoute: Routes("chat_with_ai") {
-        fun createRoute() = "chat_with_ai"
+    // Require image send to AI for the first message
+    data object ScreenChatWithAIRoute: Routes("chat_with_ai/{${CONVERSATION_ID}}/{${IMAGE_INIT_ID}}") {
+        fun createRoute(id: String, image: String) = "chat_with_ai/$id/$image"
     }
 
-    data object ScreenInteractionRoutes: Routes("interaction") {
-        fun createRoute() = "interaction"
+    data object ScreenInteractionRoutes:
+        Routes("interaction/{$INTERACTION_PROMPT}/{$INTERACTION_IMAGE}/{$INTERACTION_MAKEUP_TYPE}") {
+        fun createRoute(
+            interactionPrompt: String,
+            interactionImage: String,
+            interactionMakeupType: String
+        ) = "interaction/$interactionPrompt/$interactionImage/$interactionMakeupType"
     }
 
+    data object ScreenMakeUpInstruction: Routes("makeup_instruction") {
+        fun createRoute() = "makeup_instruction"
+    }
+
+    data object ScreenExpertsRecommended: Routes("experts_recommended/{${QUESTION_ID}}") {
+        fun createRoute(id: String) = "experts_recommended/$id"
+    }
+
+    // ----------------------------------------------------------------------------
 
     /*
-    -- Route page3
+    -- Route /main/profile --
      */
-    data object Page3 : Routes("shopping") {
-        fun createRoute() = "shopping"
-    }
 
-    data object Page4 : Routes("account") {
+    data object ScreenUserProfile : Routes("account") {
         fun createRoute() = "account"
     }
 
@@ -147,5 +153,14 @@ sealed class Routes(
         const val MAKE_UP_CATEGORY_ID = "makeup_category_id"
         const val MAKE_UP_TITLE_ID = "makeup_title_id"
         const val MAKE_UP_TEMPLATE_ID = "makeup_template_id"
+
+        const val INTERACTION_PROMPT = "interaction_prompt"
+        const val INTERACTION_IMAGE = "interaction_image"
+        const val INTERACTION_MAKEUP_TYPE = "interaction_makeup_type"
+
+        const val CONVERSATION_ID = "conversation_id"
+        const val IMAGE_INIT_ID = "image_id"
+
+        const val QUESTION_ID = "question_id"
     }
 }

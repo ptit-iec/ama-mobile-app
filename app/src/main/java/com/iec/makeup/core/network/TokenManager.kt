@@ -18,4 +18,5 @@ class TokenManager @Inject constructor(
 ) {
     fun setToken(token: String) = dataStore.saveKey(PreferenceKeys.USER_TOKEN, token)
     fun getToken(): Flow<String?> = dataStore.readKey(PreferenceKeys.USER_TOKEN)
+    fun deleteToken() = dataStore.saveKey(PreferenceKeys.USER_TOKEN, "")
 }

@@ -1,10 +1,11 @@
-package com.iec.makeup.ui.features.home.screen_makeup_info
+package com.iec.makeup.ui.features.home.screen_expert_detail_information
 
 import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.iec.makeup.core.BaseViewModel
 import com.iec.makeup.core.Reducer
 import com.iec.makeup.data.remote.dto.ExpertDetail
+import com.iec.makeup.data.remote.dto.UserReviewExpertDTO
 import com.iec.makeup.data.repository.ExpertRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -20,7 +21,8 @@ import javax.inject.Inject
 data class StylistDetailScreenState(
     val isLoading: Boolean = false,
     val error: String? = null,
-    val expertData: ExpertDetail? = null
+    val expertData: ExpertDetail? = null,
+    val userReviews: List<UserReviewExpertDTO>? = null
 ) : Reducer.ViewState
 
 
@@ -31,6 +33,7 @@ sealed class StylistDetailScreenEffect : Reducer.ViewEffect{
 
 sealed class StylistDetailScreenEvent: Reducer.ViewEvent {
     data class OnExpertDataLoaded(val expertData: ExpertDetail) : StylistDetailScreenEvent()
+    data class OnUserReviewsLoaded(val userReviews: List<UserReviewExpertDTO>) : StylistDetailScreenEvent()
     data class OnLoading(val loading: Boolean) : StylistDetailScreenEvent()
     data class OnError(val message: String?) : StylistDetailScreenEvent()
 }
@@ -58,6 +61,13 @@ class StylistDetailScreenReducer : Reducer<StylistDetailScreenState, StylistDeta
                     isLoading = event.loading
                 ) to null
             }
+
+            is StylistDetailScreenEvent.OnUserReviewsLoaded -> {
+                currentState.copy(
+                    isLoading = false,
+                    userReviews = event.userReviews
+                ) to null
+            }
         }
     }
 
@@ -77,10 +87,24 @@ class StylistDetailScreenVM @Inject constructor(
         sendEvent(StylistDetailScreenEvent.OnError(throwable.message ?: "Unknown error"))
     }
 
+    fun initData(id: String){
+        getExpertDetailInformation(id)
+        getUserReviews(id)
+    }
 
-    fun getExpertDetailInformation(id: String){
+
+    private fun getUserReviews(id: String){
         sendEvent(StylistDetailScreenEvent.OnLoading(true))
-        getExpertById(id).onEach { response ->
+        doGetUserReviews(id).onEach { response ->
+            sendEvent(StylistDetailScreenEvent.OnUserReviewsLoaded(response))
+            sendEvent(StylistDetailScreenEvent.OnLoading(false))
+        }.launchIn(scope)
+    }
+
+
+    private fun getExpertDetailInformation(id: String){
+        sendEvent(StylistDetailScreenEvent.OnLoading(true))
+        doGetExpertById(id).onEach { response ->
             if(response != null){
                 sendEvent(StylistDetailScreenEvent.OnExpertDataLoaded(response))  }
             else{
@@ -94,7 +118,7 @@ class StylistDetailScreenVM @Inject constructor(
         sendEvent(StylistDetailScreenEvent.OnError(null))
     }
 
-    private fun getExpertById(id: String) = callbackFlow {
+    private fun doGetExpertById(id: String) = callbackFlow {
         try {
             val response = expertRepository.getExpertByID(id)
             trySend(response)
@@ -104,5 +128,22 @@ class StylistDetailScreenVM @Inject constructor(
         awaitClose{
 
         }
+    }
+
+
+    private fun doGetUserReviews(expertID: String) = callbackFlow {
+        try {
+            val response = expertRepository.getUserReviewsExpert(expertID)
+            trySend(response)
+        }catch (e: Exception){
+            Log.d("StylistDetailScreenVM", "getUserReviews: ${e.message}")
+        }
+        awaitClose{
+
+        }
+    }
+
+    fun onRefreshData(){
+
     }
 }

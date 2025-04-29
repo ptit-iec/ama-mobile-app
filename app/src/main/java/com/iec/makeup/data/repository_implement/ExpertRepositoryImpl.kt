@@ -1,15 +1,14 @@
-package com.iec.makeup.data.remote.repository
+package com.iec.makeup.data.repository_implement
 
-import android.graphics.pdf.PdfDocument.Page
 import android.util.Log
 import com.iec.makeup.core.model.ui.Expert
 import com.iec.makeup.data.remote.api.ExpertEndpoint
 import com.iec.makeup.data.remote.dto.ExpertDetail
+import com.iec.makeup.data.remote.dto.UserReviewExpertDTO
 import com.iec.makeup.data.remote.dto.toExpert
 import com.iec.makeup.data.repository.ExpertRepository
 import com.iec.makeup.network.Pagination
 import javax.inject.Inject
-import kotlin.jvm.Throws
 
 class ExpertRepositoryImpl @Inject constructor(
     private val expertEndpoint: ExpertEndpoint
@@ -48,6 +47,19 @@ class ExpertRepositoryImpl @Inject constructor(
     override suspend fun getExpertByID(id: String): ExpertDetail {
         try {
             val result = expertEndpoint.getExpertDetail(id)
+            if (result.success == true) {
+                return result.data ?: throw Exception("No data")
+            } else {
+                throw Exception(result.message)
+            }
+        } catch (e: Exception) {
+            throw e
+        }
+    }
+
+    override suspend fun getUserReviewsExpert(expertID: String): List<UserReviewExpertDTO> {
+        try {
+            val result = expertEndpoint.getExpertRate(expertID)
             if (result.success == true) {
                 return result.data ?: throw Exception("No data")
             } else {

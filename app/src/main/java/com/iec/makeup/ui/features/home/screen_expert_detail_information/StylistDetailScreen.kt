@@ -1,14 +1,12 @@
-package com.iec.makeup.ui.features.home.screen_makeup_info
+package com.iec.makeup.ui.features.home.screen_expert_detail_information
 
 import android.util.Log
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -36,6 +34,7 @@ import coil.compose.AsyncImage
 import com.iec.makeup.R
 import com.iec.makeup.data.remote.dto.ExpertDetail
 import com.iec.makeup.ui.LocalAppState
+import com.iec.makeup.ui.features.home.screen_expert_detail_information.ui_components.ItemReviewCard
 import com.iec.makeup.ui.theme.ColorDB7093
 import com.iec.makeup.ui.theme.ColorFAF9F9
 
@@ -60,7 +59,7 @@ fun ProfileScreen(
     val appState = LocalAppState.current
 
     LaunchedEffect(Unit) {
-        viewModel.getExpertDetailInformation(id)
+        viewModel.initData(id)
     }
 
     ProfileScreenStateless(
@@ -123,13 +122,13 @@ fun ProfileScreenStateless(
                         Icon(
                             imageVector = Icons.Default.List, // Placeholder icon for "Hồ sơ"
                             contentDescription = "Profile Icon",
-                            tint = if(pagerType == PagerTab.PROFILE) Color.Red else Color.Black, // Example orange color), // Example color
+                            tint = if (pagerType == PagerTab.PROFILE) Color.Red else Color.Black, // Example orange color), // Example color
                             modifier = Modifier.size(24.dp) // Set icon size
                         )
                         Spacer(modifier = Modifier.width(4.dp)) // Add space between icon and text
                         Text(
                             text = "Hồ sơ",
-                            color = if(pagerType == PagerTab.PROFILE) Color.Red else Color.Black // Example color for text
+                            color = if (pagerType == PagerTab.PROFILE) Color.Red else Color.Black // Example color for text
                         )
                     }
 
@@ -157,19 +156,44 @@ fun ProfileScreenStateless(
                         Spacer(modifier = Modifier.width(4.dp)) // Add space between icon and text
                         Text(
                             text = "Đánh giá",
-                            color = if(pagerType == PagerTab.REVIEW) Color.Red else Color.Black
+                            color = if (pagerType == PagerTab.REVIEW) Color.Red else Color.Black
                         )
                     }
                 }
                 if (pagerType == PagerTab.PROFILE) {
-                    state.expertData.samplesByCategory.forEach {
-                        ImageSection(
-                            title = it.title!!,
-                            images = it.samples.map { it.image!! }) // Pass actual data
-                        Spacer(modifier = Modifier.height(16.dp))
+                    if (state.expertData.samplesByCategory.isEmpty()) {
+                        Text(
+                            text = "Không có dữ liệu",
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    } else {
+                        state.expertData.samplesByCategory.forEach {
+                            ImageSection(
+                                title = it.title!!,
+                                images = it.samples.map { it.image!! }) // Pass actual data
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
                     }
                 } else {
-                    Box() {}
+                    if (state.userReviews.isNullOrEmpty()) {
+                        Text(
+                            text = "Không có dữ liệu",
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    } else {
+                        LazyVerticalGrid(
+                            columns = GridCells.Fixed(2),
+                            modifier = Modifier.weight(1f).padding(16.dp),
+                        ) {
+                            items(state.userReviews.size) { index ->
+                                ItemReviewCard(
+                                    item = state.userReviews[index],
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -345,9 +369,9 @@ fun ImageSection(title: String, images: List<String>) { // Use List<String> for 
                 .fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            items(images.size + 5) { imageResId -> // Or imageUrl for network images
+            items(images.size) { index -> // Or imageUrl for network images
                 AsyncImage(
-                    model = images[0], // Use Coil/Glide for URLs
+                    model = images[index], // Use Coil/Glide for URLs
                     contentDescription = "$title Image",
                     contentScale = ContentScale.Crop,
                     onError = {

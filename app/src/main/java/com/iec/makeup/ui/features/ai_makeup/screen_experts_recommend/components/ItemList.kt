@@ -1,4 +1,4 @@
-package com.iec.makeup.ui.features.home.screen_all_makeup.components
+package com.iec.makeup.ui.features.ai_makeup.screen_experts_recommend.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.runtime.Composable
@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.NearMe
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
@@ -40,15 +39,13 @@ fun MakeUpItemCard(
 ) {
     Card(
         shape = RoundedCornerShape(8.dp),
-        modifier = modifier.clickable {
-            onNavToDetail(item.name ?: "Chưa cập nhật")
-        },
-        colors = CardDefaults.cardColors(containerColor = ColorFFF0F5),
+        modifier = modifier,
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFD7D7)),
         border = BorderStroke(1.dp, ColorDB7093)
     ) {
         Column(
             modifier = Modifier
-                .padding(16.dp) // Add padding around the entire card content
+                .padding(vertical = 8.dp, horizontal = 12.dp) // Add padding around the entire card content
                 .fillMaxWidth()
         ) {
             // --- Top Section: Doctor Info & Rating ---
@@ -91,34 +88,26 @@ fun MakeUpItemCard(
                             fontSize = 16.sp,
                             color = Color.Black // Or MaterialTheme.colorScheme.onSurface
                         )
-                        // Rating
-                        Card(
-                            colors = CardDefaults.cardColors(
-                                containerColor = ColorDB7093
-                            ),
-                            shape = RoundedCornerShape(4.dp),
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
                         ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.NearMe,
-                                    contentDescription = "Rating Star",
-                                    tint = Color.White,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(
-                                    modifier = Modifier.widthIn(max = 50.dp),
-                                    overflow = TextOverflow.Ellipsis,
-                                    maxLines = 1,
-                                    text = item.rating?.average.toString() + "km",
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 16.sp,
-                                    color = Color.White // Or MaterialTheme.colorScheme.onSurface
-                                )
-                            }
+                            Icon(
+                                imageVector = Icons.Filled.NearMe,
+                                contentDescription = "Rating Star",
+                                tint = Color.White,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                modifier = Modifier.widthIn(max = 50.dp),
+                                overflow = TextOverflow.Ellipsis,
+                                maxLines = 1,
+                                text = item.rating?.average.toString() + "km",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 16.sp,
+                                color = Color.Black // Or MaterialTheme.colorScheme.onSurface
+                            )
                         }
                     }
                     Text(
@@ -141,19 +130,19 @@ fun MakeUpItemCard(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFFFD7D7)),
                 elevation = CardDefaults.cardElevation(defaultElevation = 0.dp) // No shadow
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
                         text = "Price: xxxx",
                         fontSize = 14.sp,
-                        color = Color.Gray
+                        color = Color.Black
                     )
                     Text(
                         text = "Availability: xxxx",
                         fontSize = 14.sp,
-                        color = Color.Gray
+                        color = Color.Black
                     )
                 }
             }
@@ -187,7 +176,9 @@ fun MakeUpItemCard(
                 }
 
                 Button(
-                    onClick = onBookNowClick,
+                    onClick = {
+                        onNavToDetail(item.Id ?: "Chưa cập nhật")
+                    },
                     modifier = Modifier
                         .padding(start = 16.dp)
                         .wrapContentWidth()
@@ -210,7 +201,7 @@ fun MakeUpItemCard(
 @Preview
 @Composable
 private fun Preview() {
-    MakeUpItemCard(
+    com.iec.makeup.ui.features.ai_makeup.screen_experts_recommend.components.MakeUpItemCard(
         item = Expert(
             name = "Dr. Arlene McCoy",
             avatar = "https://i.ytimg.com/vi/DYkKy3FtSv8/maxresdefault.jpg",

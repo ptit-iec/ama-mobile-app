@@ -1,4 +1,4 @@
-package com.iec.makeup.ui.features.home.screen_all_makeup
+package com.iec.makeup.ui.features.ai_makeup.screen_experts_recommend
 
 import android.util.Log
 import androidx.lifecycle.viewModelScope
@@ -16,61 +16,61 @@ import kotlinx.serialization.Serializable
 import javax.inject.Inject
 
 @Serializable
-data class AllMakeUpStylistState(
+data class ScreenExpertsState(
     val isLoading: Boolean = false,
     val error: String? = null,
     val data: List<Expert> = emptyList()
 ) : Reducer.ViewState
 
-sealed class AllMakeUpStylistEffect : Reducer.ViewEffect {
-    data class ShowToast(val message: String) : AllMakeUpStylistEffect()
-    data class ShowError(val message: String?) : AllMakeUpStylistEffect()
+sealed class ScreenExpertsEffect : Reducer.ViewEffect {
+    data class ShowToast(val message: String) : ScreenExpertsEffect()
+    data class ShowError(val message: String?) : ScreenExpertsEffect()
 }
 
-sealed class AllMakeUpStylistEvent : Reducer.ViewEvent {
+sealed class ScreenExpertsEvent : Reducer.ViewEvent {
     data class OnInitData(
         val data: List<Expert>
-    ) : AllMakeUpStylistEvent()
+    ) : ScreenExpertsEvent()
 
     data class OnLoading(
         val isLoading: Boolean
-    ) : AllMakeUpStylistEvent()
+    ) : ScreenExpertsEvent()
 
     data class OnError(
         val error: String?
-    ) : AllMakeUpStylistEvent()
+    ) : ScreenExpertsEvent()
 
     data class OnLoadMore(
         val data: List<Expert>
-    ) : AllMakeUpStylistEvent()
+    ) : ScreenExpertsEvent()
 }
 
-class AllMakeUpStylistReducer :
-    Reducer<AllMakeUpStylistState, AllMakeUpStylistEvent, AllMakeUpStylistEffect> {
+class ScreenExpertsReducer :
+    Reducer<ScreenExpertsState, ScreenExpertsEvent, ScreenExpertsEffect> {
     override fun reduce(
-        currentState: AllMakeUpStylistState,
-        event: AllMakeUpStylistEvent
-    ): Pair<AllMakeUpStylistState, AllMakeUpStylistEffect?> {
+        currentState: ScreenExpertsState,
+        event: ScreenExpertsEvent
+    ): Pair<ScreenExpertsState, ScreenExpertsEffect?> {
         return when (event) {
-            is AllMakeUpStylistEvent.OnInitData -> {
+            is ScreenExpertsEvent.OnInitData -> {
                 currentState.copy(
                     data = event.data
                 ) to null
             }
 
-            is AllMakeUpStylistEvent.OnLoading -> {
+            is ScreenExpertsEvent.OnLoading -> {
                 currentState.copy(
                     isLoading = event.isLoading
                 ) to null
             }
 
-            is AllMakeUpStylistEvent.OnError -> {
+            is ScreenExpertsEvent.OnError -> {
                 currentState.copy(
                     error = event.error
-                ) to AllMakeUpStylistEffect.ShowError(event.error)
+                ) to ScreenExpertsEffect.ShowError(event.error)
             }
 
-            is AllMakeUpStylistEvent.OnLoadMore -> {
+            is ScreenExpertsEvent.OnLoadMore -> {
                 currentState.copy(
                     data = currentState.data + event.data
                 ) to null
@@ -81,32 +81,32 @@ class AllMakeUpStylistReducer :
 }
 
 @HiltViewModel
-class AllMakeUpVM @Inject constructor(
+class ScreenExpertsRcmVM @Inject constructor(
     private val expertRepository: ExpertRepository
-) : BaseViewModel<AllMakeUpStylistState, AllMakeUpStylistEvent, AllMakeUpStylistEffect>(
-    initialState = AllMakeUpStylistState(),
-    reducer = AllMakeUpStylistReducer()
+) : BaseViewModel<ScreenExpertsState, ScreenExpertsEvent, ScreenExpertsEffect>(
+    initialState = ScreenExpertsState(),
+    reducer = ScreenExpertsReducer()
 ) {
     private var isFetchingData = false
     init {
-        sendEvent(AllMakeUpStylistEvent.OnLoading(true))
+        sendEvent(ScreenExpertsEvent.OnLoading(true))
         getExperts(true).onEach {
-            sendEvent(AllMakeUpStylistEvent.OnInitData(it))
-            sendEvent(AllMakeUpStylistEvent.OnLoading(false))
+            sendEvent(ScreenExpertsEvent.OnInitData(it))
+            sendEvent(ScreenExpertsEvent.OnLoading(false))
         }.catch {
-            sendEventWithEffect(AllMakeUpStylistEvent.OnError(it.message))
+            sendEventWithEffect(ScreenExpertsEvent.OnError(it.message))
         }.launchIn(viewModelScope)
     }
     fun loadMoreExperts(){
         if(!isFetchingData){
             isFetchingData = true
-            sendEvent(AllMakeUpStylistEvent.OnLoading(true))
+            sendEvent(ScreenExpertsEvent.OnLoading(true))
             getExperts(false).onEach {
-                sendEvent(AllMakeUpStylistEvent.OnLoadMore(it))
-                sendEvent(AllMakeUpStylistEvent.OnLoading(false))
+                sendEvent(ScreenExpertsEvent.OnLoadMore(it))
+                sendEvent(ScreenExpertsEvent.OnLoading(false))
                 isFetchingData = false
             }.catch {
-                sendEventWithEffect(AllMakeUpStylistEvent.OnError(it.message))
+                sendEventWithEffect(ScreenExpertsEvent.OnError(it.message))
             }.launchIn(viewModelScope)
         }
     }

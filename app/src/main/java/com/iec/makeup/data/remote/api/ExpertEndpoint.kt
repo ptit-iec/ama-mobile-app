@@ -3,6 +3,7 @@ package com.iec.makeup.data.remote.api
 import com.google.gson.annotations.SerializedName
 import com.iec.makeup.data.remote.dto.ExpertDTO
 import com.iec.makeup.data.remote.dto.ExpertDetail
+import com.iec.makeup.data.remote.dto.UserReviewExpertDTO
 import com.iec.makeup.network.APIResult
 import com.iec.makeup.network.APIResultPaging
 import kotlinx.serialization.Serializable
@@ -22,5 +23,9 @@ interface ExpertEndpoint {
 
     @GET("/expertDetail/{id}")
     suspend fun getExpertDetail(@Path("id") id: String): APIResult<ExpertDetail>
+
+    @GET("/expertRate/{id}/rate")
+    suspend fun getExpertRate(@Path("id") id: String): APIResult<List<UserReviewExpertDTO>>
+
 
 }

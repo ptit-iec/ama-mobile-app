@@ -12,6 +12,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -23,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -49,6 +52,7 @@ fun MakeupApp(
     val currDestination = appState.currentTopLevelDestination.collectAsStateWithLifecycle()
     val isError = remember { mutableStateOf<String?>(null) }
     val isLoading = appState.isLoading.collectAsStateWithLifecycle()
+    val isFaded = appState.fadedBackground.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) {
         Log.d(TAG, "Trigger Recompose")
     }
@@ -58,46 +62,29 @@ fun MakeupApp(
         Box(
             modifier = Modifier.fillMaxSize().background(color = ColorFAF9F9)
         ) {
-            ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-                // Create references for the composables to constrain
-                val (nav, bottomBar) = createRefs()
+            // NavigationGraph
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = if (isShowBottomNav.value) 50.dp else 0.dp)
+            ) {
+                NavigationGraph(navController = navController, appState = appState)
+            }
 
-                // NavigationGraph
+            // BottomNavigationBar (conditionally shown)
+            if (isShowBottomNav.value) {
                 Box(
                     modifier = Modifier
-                        .constrainAs(nav) {
-                            top.linkTo(parent.top)
-                            start.linkTo(parent.start)
-                            end.linkTo(parent.end)
-                            bottom.linkTo(if (isShowBottomNav.value) bottomBar.top else parent.bottom)
-                            width = Dimension.fillToConstraints
-                            height = Dimension.fillToConstraints
-                        }
+                        .fillMaxWidth()
+                        .align(Alignment.BottomCenter)
                 ) {
-                    NavigationGraph(navController = navController, appState = appState)
+                    BottomNavigationBar(
+                        onTopLevelClick = {
+                            appState.navigateToTopLevelDestination(it)
+                        },
+                        currentDestination = currDestination.value
+                    )
                 }
-
-                // BottomNavigationBar (conditionally shown)
-                if (isShowBottomNav.value) {
-                    Box(
-                        modifier = Modifier
-                            .constrainAs(bottomBar) {
-                                bottom.linkTo(parent.bottom)
-                                start.linkTo(parent.start)
-                                end.linkTo(parent.end)
-                                width = Dimension.fillToConstraints
-                            }
-                    ) {
-                        BottomNavigationBar(
-                            onTopLevelClick = {
-                                appState.navigateToTopLevelDestination(it)
-                            },
-                            currentDestination = currDestination.value
-                        )
-                    }
-                }
-
-
             }
             if (isError.value != null) {
                 DialogCompose(
@@ -120,6 +107,17 @@ fun MakeupApp(
                     contentAlignment = Alignment.Center
                 ) {
                     AtomicLoadingDialog()
+                }
+            }
+
+            if(isFaded.value){
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(color = Color.Black.copy(alpha = 0.8f)),
+                    contentAlignment = Alignment.Center
+                ){
+
                 }
             }
         }
