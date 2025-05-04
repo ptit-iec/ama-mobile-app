@@ -93,6 +93,7 @@ class AppModule {
             .addInterceptor(loggingInterceptor)
             .addInterceptor(authInterceptor)
             .connectTimeout(TIME_OUT, TimeUnit.MILLISECONDS)
+            .readTimeout(TIME_OUT, TimeUnit.MILLISECONDS)
             .build()
 
         return Retrofit.Builder()

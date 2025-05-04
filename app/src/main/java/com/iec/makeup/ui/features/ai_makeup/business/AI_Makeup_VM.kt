@@ -166,7 +166,9 @@ class AIScreenVM @Inject constructor(
     }
 
     fun inputDescription(description: String) {
-        sendEvent(AIScreenEvent.OnRequestDescription(description))
+        if(description.length < 2000){
+            sendEvent(AIScreenEvent.OnRequestDescription(description))
+        }
     }
 
     fun onInitData(data: List<String>?, description: String) {

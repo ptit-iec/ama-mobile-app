@@ -148,6 +148,16 @@ sealed class Routes(
         fun createRoute() = "account"
     }
 
+    // ----------------------------------------------------------------------------
+
+    /*
+    -- Route /booking_expert --
+     */
+
+    data object ScreenBookingExpert : Routes("booking_expert/{${EXPERT_ID}}") {
+        fun createRoute(id: String) = "booking_expert/$id"
+    }
+
     companion object {
         const val MAKE_UP_STYLIST_ID = "makeup_stylist_id"
         const val MAKE_UP_CATEGORY_ID = "makeup_category_id"
@@ -162,5 +172,7 @@ sealed class Routes(
         const val IMAGE_INIT_ID = "image_id"
 
         const val QUESTION_ID = "question_id"
+
+        const val EXPERT_ID = "expert_id"
     }
 }

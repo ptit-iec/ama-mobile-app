@@ -248,12 +248,12 @@ fun ScreenChatStateless(
                     onMessageChange(it)
                 },
                 onMessageSent = {
-                    onInitMessageSent()
-//                    if (state.messages.size < 2) {
-//                        onInitMessageSent()
-//                    } else {
-//                        onMessageSent()
-//                    }
+//                    onInitMessageSent()
+                    if (state.messages.size < 2) {
+                        onInitMessageSent()
+                    } else {
+                        onMessageSent()
+                    }
                 }
             )
         }
@@ -268,7 +268,9 @@ fun ChatWithAIComponents(
     val listState = rememberLazyListState()
 
     LaunchedEffect(messages.size) {
-        listState.scrollToItem(messages.size - 1)
+       if(messages.isNotEmpty()){
+           listState.scrollToItem(messages.size - 1)
+       }
     }
     LaunchedEffect(key1 = messages.lastOrNull()?.message) {
         Log.d("ChatMessage", if (messages.isNotEmpty()) messages.last().message else "No")
@@ -282,8 +284,8 @@ fun ChatWithAIComponents(
     ) {
         LazyColumn(
             modifier = Modifier,
+            state = listState
         ) {
-
             itemsIndexed(
                 messages
             ) { index, chatMessage ->

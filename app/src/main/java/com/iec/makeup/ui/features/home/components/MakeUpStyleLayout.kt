@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -34,7 +35,7 @@ fun MakeUpStyleLayout(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Card(
-            modifier = Modifier.size(80.dp),
+            modifier = Modifier.size(100.dp),
             shape = RoundedCornerShape(8.dp),
             elevation = CardDefaults.cardElevation(0.dp),
         ) {
@@ -48,6 +49,7 @@ fun MakeUpStyleLayout(
         Text(
             text = item.title,
             textAlign = TextAlign.Center,
+            fontWeight = FontWeight.Bold,
             fontSize = 12.sp,
             color = ColorDB7093,
             maxLines = 1,

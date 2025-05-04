@@ -1,4 +1,4 @@
-package com.iec.makeup.ui.features.home.screen_booking.components
+package com.iec.makeup.ui.features.booking.components
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity

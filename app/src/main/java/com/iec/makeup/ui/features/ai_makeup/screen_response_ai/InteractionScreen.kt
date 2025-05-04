@@ -56,7 +56,9 @@ fun InteractionScreenStateful(
     LaunchedEffect(Unit) {
         if(chatbotRequest == null) navBack()
         else{
-            viewModel.getInitResponse(chatbotRequest)
+            if(state.value.data.isEmpty()){
+                viewModel.getInitResponse(chatbotRequest)
+            }
         }
     }
     InteractionScreenStateless(
@@ -72,6 +74,8 @@ fun InteractionScreenStateless(
     navToEditScreen:  (String, String) -> Unit = {_,_ ->},
     state: InteractionState = InteractionState()
 ){
+
+    var isPicked by rememberSaveable { mutableIntStateOf(0) }
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -108,7 +112,9 @@ fun InteractionScreenStateless(
                 ) {
                     if(state.data.isNotEmpty()){
                         InteractionScreen(
-                            data = state.data
+                            data = state.data,
+                            indexPicked = isPicked,
+                            setPicked = { isPicked = it }
                         )
                     }
                     Spacer(modifier = Modifier.height(16.dp))
@@ -123,7 +129,7 @@ fun InteractionScreenStateless(
                         ),
                         onClick = {
                             if(state.data.isNotEmpty()){
-                                navToEditScreen(state.resultChatID ?: "", Uri.encode(state.data[0]))
+                                navToEditScreen(state.resultChatID ?: "", Uri.encode(state.data[isPicked]))
                             }
                         },
                     ) {
@@ -150,8 +156,9 @@ fun InteractionScreenStateless(
 @Composable
 fun InteractionScreen(
     data: List<String> = listOf("https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80"),
+    indexPicked: Int,
+    setPicked: (Int) -> Unit = {},
 ) {
-    var isPicked by rememberSaveable { mutableIntStateOf(0) }
     Column(
         modifier = Modifier
             .padding(vertical = 8.dp, horizontal = 4.dp)
@@ -177,7 +184,7 @@ fun InteractionScreen(
             ),
         ) {
             AsyncImage(
-                model = data[isPicked],
+                model = data[indexPicked],
                 contentDescription = "j",
                 contentScale = ContentScale.FillHeight,
                 alignment = Alignment.Center,
@@ -205,7 +212,7 @@ fun InteractionScreen(
                             spotColor = ColorDB7093
                         )
                         .clickable {
-                            isPicked = it
+                            setPicked(it)
                         },
                 ) {
                     Card(
@@ -213,13 +220,13 @@ fun InteractionScreen(
                         elevation = CardDefaults.cardElevation(
                             defaultElevation = 8.dp
                         ),
-                        border = if (isPicked == it) BorderStroke(
+                        border = if (indexPicked == it) BorderStroke(
                             2.dp,
                             ColorDB7093
                         ) else BorderStroke(0.dp, Color.Transparent),
                     ) {
                         AsyncImage(
-                            model = data[isPicked],
+                            model = data[it],
                             contentScale = ContentScale.Crop,
                             contentDescription = "Image",
                         )

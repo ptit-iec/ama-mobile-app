@@ -23,8 +23,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
@@ -436,7 +438,8 @@ fun LoginScreenWithGoogle(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 32.dp, vertical = 16.dp),
+                .padding(horizontal = 32.dp, vertical = 16.dp)
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -477,7 +480,7 @@ fun LoginScreenWithGoogle(
                         Image(
                             painter = painterResource(R.drawable.manual),
                             contentDescription = "Instructions",
-                            modifier = Modifier.size(36.dp),
+                            modifier = Modifier.size(40.dp),
                         )
                         Text(
                             text = stringResource(R.string.instructions),
@@ -496,7 +499,7 @@ fun LoginScreenWithGoogle(
                         Image(
                             painter = painterResource(R.drawable.event__1_),
                             contentDescription = "Instructions",
-                            modifier = Modifier.size(36.dp)
+                            modifier = Modifier.size(40.dp)
                         )
                         Text(
                             text = stringResource(R.string.booking),
@@ -530,7 +533,7 @@ fun LoginScreenWithGoogle(
                         Image(
                             painter = painterResource(R.drawable.idea),
                             contentDescription = "Instructions",
-                            modifier = Modifier.size(36.dp)
+                            modifier = Modifier.size(40.dp)
                         )
                         Text(
                             text = stringResource(R.string.recommend_makeup),
@@ -549,7 +552,7 @@ fun LoginScreenWithGoogle(
                         Image(
                             painter = painterResource(R.drawable.text_message),
                             contentDescription = "Instructions",
-                            modifier = Modifier.size(36.dp)
+                            modifier = Modifier.size(40.dp)
                         )
                         Text(
                             text = stringResource(R.string.chat_with_ai),

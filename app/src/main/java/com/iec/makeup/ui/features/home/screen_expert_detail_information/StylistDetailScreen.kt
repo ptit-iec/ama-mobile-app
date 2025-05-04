@@ -47,6 +47,7 @@ enum class PagerTab(val title: String) {
 @Composable
 fun ProfileScreen(
     navBack: () -> Unit = {},
+    navToBookingScreen: (String) -> Unit = {},
     id: String = "Vu Hoai Nam"
 ) {
 
@@ -64,7 +65,8 @@ fun ProfileScreen(
 
     ProfileScreenStateless(
         navBack = navBack,
-        state = state.value
+        state = state.value,
+        navToBookingScreen = navToBookingScreen
     )
     appState.setLoading(state.value.isLoading)
 }
@@ -82,7 +84,8 @@ fun ProfileScreenStateless(
         ),
         isLoading = false,
         error = null
-    )
+    ),
+    navToBookingScreen: (String) -> Unit = {}
 ) {
     var pagerType by remember { mutableStateOf(PagerTab.PROFILE) }
     Scaffold(
@@ -104,7 +107,9 @@ fun ProfileScreenStateless(
 
                 )
                 ActionButtons(
-                    onActionClick = {}
+                    onActionClick = {
+                        navToBookingScreen(state.expertData.id ?: "")
+                    }
                 )
                 Row(
                     modifier = Modifier
@@ -337,7 +342,9 @@ fun ActionButtons(onActionClick: () -> Unit) {
         horizontalArrangement = Arrangement.Center // Space between buttons
     ) {
         Button(
-            onClick = { /* Handle Book action */ },
+            onClick = {
+                onActionClick()
+            },
             modifier = Modifier.wrapContentWidth(), // Takes up half the available space
             shape = RoundedCornerShape(8.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE91E63)) // Pink color

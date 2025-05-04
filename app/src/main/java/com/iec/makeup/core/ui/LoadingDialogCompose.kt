@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.iec.makeup.ui.theme.primaryColor
 
 @Preview
 @Composable
@@ -40,7 +41,7 @@ private fun PreviewLoading() {
 @Composable
 fun AtomicLoadingDialog(
     tintColor: Color = Color.White,
-    containerColor: Color = Color(0xFFFF69B4),
+    containerColor: Color = primaryColor,
     borderWidth: Dp = 3.dp,
     cycleDuration: Int = 1000,
     isLoading: Boolean = true, isCritical: Boolean = false

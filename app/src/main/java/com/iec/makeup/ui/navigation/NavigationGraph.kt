@@ -32,6 +32,8 @@ import com.iec.makeup.ui.features.authentication.third_party_auth.GoogleAuthLoad
 import com.iec.makeup.ui.features.home.HomeScreen
 import com.iec.makeup.ui.features.home.screen_all_makeup.AllMakeUpScreen
 import com.iec.makeup.ui.features.home.screen_all_makeup_template.ScreenAllMakeupTemplateOfCategoryStateful
+import com.iec.makeup.ui.features.booking.BookingScreen
+import com.iec.makeup.ui.features.booking.screen_finish_book.ScreenBookCompleted
 import com.iec.makeup.ui.features.home.screen_detail_template_layout.ScreenDetailTemplateLayoutStateful
 import com.iec.makeup.ui.features.home.screen_expert_detail_information.ProfileScreen
 import com.iec.makeup.ui.features.home.screen_notification.NotificationContent
@@ -190,7 +192,7 @@ fun NavigationGraph(
                             launchSingleTop = false
                             restoreState = true
                         }
-                    }
+                    },
                 )
             }
             composable(
@@ -207,7 +209,7 @@ fun NavigationGraph(
                         animationSpec = tween(100)
                     )
                 }) {
-                appState.setVisibleBottomNav(true)
+                appState.setVisibleBottomNav(false)
                 NotificationContent(
                     navBack = { navController.popBackStack() }
                 )
@@ -226,7 +228,7 @@ fun NavigationGraph(
                         animationSpec = tween(100)
                     )
                 }) {
-                appState.setVisibleBottomNav(true)
+                appState.setVisibleBottomNav(false)
                 SearchScreen(
                     navBack = { navController.popBackStack() }
                 )
@@ -245,6 +247,7 @@ fun NavigationGraph(
                         animationSpec = tween(100)
                     )
                 }) {
+                appState.setVisibleBottomNav(false)
                 AllMakeUpScreen(
                     navBack = { navController.popBackStack() },
                     navToDetail = {
@@ -259,10 +262,14 @@ fun NavigationGraph(
                     navArgument(Routes.MAKE_UP_STYLIST_ID) { type = NavType.StringType }
                 )
             ) {
+                appState.setVisibleBottomNav(false)
                 val idMakeUp = it.arguments?.getString(Routes.MAKE_UP_STYLIST_ID) ?: "0"
                 ProfileScreen(
                     id = idMakeUp,
-                    navBack = { navController.popBackStack() }
+                    navBack = { navController.popBackStack() },
+                    navToBookingScreen = { exId ->
+                        navController.navigate(Routes.ScreenBookingExpert.createRoute(exId))
+                    }
                 )
             }
 
@@ -287,7 +294,7 @@ fun NavigationGraph(
                     navArgument(Routes.MAKE_UP_TITLE_ID) { type = NavType.StringType }
                 )
             ) {
-                appState.setVisibleBottomNav(true)
+                appState.setVisibleBottomNav(false)
                 val idCategory =
                     it.arguments?.getString(Routes.MAKE_UP_CATEGORY_ID)?.split(",") ?: emptyList()
                 ScreenAllMakeupTemplateOfCategoryStateful(
@@ -315,7 +322,7 @@ fun NavigationGraph(
                     }
                 )
             ) { it ->
-                appState.setVisibleBottomNav(true)
+                appState.setVisibleBottomNav(false)
                 val idCategory = it.arguments?.getString(Routes.MAKE_UP_TEMPLATE_ID)
                 val makeUpLayout = idCategory?.let { layout ->
                     Json.decodeFromString<MakeUpTemplateLayout>(layout)
@@ -425,8 +432,8 @@ fun NavigationGraph(
                     appState.setVisibleBottomNav(false)
                     val id = it.arguments?.getString(Routes.CONVERSATION_ID) ?: ""
                     val image = Uri.decode(it.arguments?.getString(Routes.IMAGE_INIT_ID) ?: "")
-                    val parentEntry = remember {  navController.getBackStackEntry("main") }
-                    val viewModel : ScreenChatWithAIVM = hiltViewModel(parentEntry)
+                    val parentEntry = remember { navController.getBackStackEntry("main") }
+                    val viewModel: ScreenChatWithAIVM = hiltViewModel(parentEntry)
                     ScreenChatWithAI(
                         navBack = { navController.popBackStack() },
                         navHome = {
@@ -438,12 +445,18 @@ fun NavigationGraph(
                                 restoreState = false
                             }
                         },
-                        navToInstruction = { navController.navigate(Routes.ScreenMakeUpInstruction.createRoute()){
-                            restoreState = false
-                            launchSingleTop = true
-                        } },
+                        navToInstruction = {
+                            navController.navigate(Routes.ScreenMakeUpInstruction.createRoute()) {
+                                restoreState = true
+                                launchSingleTop = true
+                            }
+                        },
                         navToExpertsRcm = { quesID ->
-                            navController.navigate(Routes.ScreenExpertsRecommended.createRoute(quesID))
+                            navController.navigate(
+                                Routes.ScreenExpertsRecommended.createRoute(
+                                    quesID
+                                )
+                            )
                         },
                         imageLink = image,
                         chatBotID = id,
@@ -454,10 +467,10 @@ fun NavigationGraph(
                 composable(
                     route = Routes.ScreenMakeUpInstruction.route
                 ) {
-                    val parentEntry = remember {  navController.getBackStackEntry("main") }
-                    val viewModel : ScreenChatWithAIVM = hiltViewModel(parentEntry)
+                    val parentEntry = remember { navController.getBackStackEntry("main") }
+                    val viewModel: ScreenChatWithAIVM = hiltViewModel(parentEntry)
                     ScreenMakeUpInstruction(
-                        navBack = { navController.popBackStack()},
+                        navBack = { navController.popBackStack() },
                         viewModel = viewModel
                     )
                 }
@@ -486,7 +499,7 @@ fun NavigationGraph(
             navigation(
                 startDestination = Routes.ScreenUserProfile.route,
                 route = "profile"
-            ){
+            ) {
                 composable(
                     route = Routes.ScreenUserProfile.route
                 ) {
@@ -497,8 +510,55 @@ fun NavigationGraph(
                                     inclusive = false
                                 }
                                 launchSingleTop = true
+                            }
                         }
+                    )
+                }
+            }
+
+            navigation(
+                startDestination = Routes.ScreenBookingExpert.route,
+                route = "main-booking"
+            ) {
+                composable(
+                    route = Routes.ScreenBookingExpert.route
+                ) {
+                    BookingScreen(
+                        navBack = { navController.popBackStack() },
+                        navToComplete = {
+                            navController.navigate("complete-booking") {
+                                popUpTo("main") {
+                                    inclusive = false
+                                }
+                                launchSingleTop = true
+                            }
+                        }
+                    )
+                }
+                composable(
+                    route = "complete-booking",
+                    enterTransition = {
+                        slideIntoContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Up,
+                            animationSpec = tween(100)
+                        )
+                    },
+                    exitTransition = {
+                        slideOutOfContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Down,
+                            animationSpec = tween(100)
+                        )
                     }
+                ) {
+                    ScreenBookCompleted(
+                        navHome = {
+                            navController.navigate("main") {
+                                popUpTo("main") {
+                                    inclusive = false
+                                }
+                                launchSingleTop = true
+                            }
+                        }
                     )
                 }
             }

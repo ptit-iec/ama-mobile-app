@@ -201,8 +201,8 @@ fun StunningRoundedCard(
     Card(
         modifier = Modifier
             .padding(8.dp)
-            .width(180.dp)
-            .height(224.dp)
+            .width(160.dp)
+            .height(180.dp)
             .clickable {
                 item.Id?.let {
                     onItemClick(it)
@@ -226,7 +226,7 @@ fun StunningRoundedCard(
             coil.compose.AsyncImage(
                 model  = item.avatar ?: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQm9eMKD3IaYPOi2BSD_6rpVNf2tkdndzUtcA&s",
                 contentDescription = "Logo",
-                contentScale = ContentScale.Fit,
+                contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
 
             )
@@ -247,7 +247,7 @@ fun StunningRoundedCard(
                     modifier = Modifier,
                     textAlign = TextAlign.Center,
                     fontFamily = FontFamily.SansSerif,
-                    fontSize = 16.sp,
+                    fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1,
@@ -264,14 +264,14 @@ fun StunningRoundedCard(
                             imageVector = Icons.Filled.NearMe,
                             contentDescription = "",
                             tint = Color.White,
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(14.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
                             text = "${String.format("%.1f", item.location?.getDistance(20.980918,105.7848362))} km",
 
                             color = Color.White,
-                            fontSize = 12.sp
+                            fontSize = 11.sp
                         )
                     }
 

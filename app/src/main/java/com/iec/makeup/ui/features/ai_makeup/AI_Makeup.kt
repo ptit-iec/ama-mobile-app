@@ -55,8 +55,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -169,7 +171,11 @@ fun VirtualScreen(
         onApply = {
             viewModel.submitImageToServer(state.value.imageURL)
             {
-                navInteraction(state.value.requestDescription ?: "", Uri.encode(it) ?: "", "6802056530135d4049a8a6d4")
+                navInteraction(
+                    state.value.requestDescription ?: "",
+                    Uri.encode(it) ?: "",
+                    "6802056530135d4049a8a6d4"
+                )
             }
         },
         inputDescription = viewModel::inputDescription,
@@ -216,7 +222,7 @@ fun AIMakeupScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
-            .padding(bottom = 16.dp), // Light pink background for the entire app
+            .padding(bottom = 24.dp), // Light pink background for the entire app
         contentAlignment = Alignment.BottomCenter,
     ) {
 
@@ -365,8 +371,17 @@ fun AIMakeupScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
-
+            Text(
+                text = stringResource(R.string.describe_expectation),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .align(Alignment.CenterHorizontally),
+                fontSize = 12.sp,
+                textAlign = TextAlign.Center,
+                color = Color.DarkGray
+            )
+            Spacer(modifier = Modifier.height(10.dp))
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -378,7 +393,7 @@ fun AIMakeupScreen(
             ) {
                 Column(modifier = Modifier.padding(vertical = 12.dp, horizontal = 4.dp)) {
                     IECTextField(
-                        placeholder = "Tôi muốn makeup tông hồng, da tôi da trắng, tóc vàng hôm nay tôi đi date với người yêu, tôi mặc 1 chiếc váy trắng với phong cách bánh bèo, trông nhẹ nhàng nữ tính",
+                        placeholder = " Makeup nhẹ nhàng với lớp nền mỏng mịn, má hồng và môi tông hồng đào, kẻ mắt mảnh kết hợp mi cong tự nhiên tạo vẻ trong trẻo, nữ tính",
                         value = state.requestDescription ?: "",
                         onValueChange = {
                             inputDescription(it)
@@ -389,24 +404,33 @@ fun AIMakeupScreen(
                             .padding(4.dp)
                     )
                     Row(
-                        modifier = Modifier
-                            .padding(horizontal = 8.dp)
-                            .clickable {
-                                randomPrompt()
-                            }, verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Shuffle,
-                            contentDescription = "Shuffle",
-                            tint = Color.DarkGray,
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ){
+                        Row(
                             modifier = Modifier
-                                .size(24.dp)
-                                .clickable {})
-                        Spacer(modifier = Modifier.width(8.dp))
+                                .padding(horizontal = 8.dp)
+                                .clickable {
+                                    randomPrompt()
+                                }, verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Shuffle,
+                                contentDescription = "Shuffle",
+                                tint = Color.DarkGray,
+                                modifier = Modifier
+                                    .size(24.dp)
+                                    .clickable {})
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Ngẫu nhiên", fontSize = 14.sp
+                            )
+                        }
                         Text(
-                            text = "Ngẫu nhiên", fontSize = 14.sp
+                            text = "${state.requestDescription?.length ?: 0}/2000 ký tự", fontSize = 14.sp,
+                            modifier = Modifier.padding(end = 18.dp)
                         )
-
                     }
                 }
             }
@@ -437,10 +461,12 @@ fun AIMakeupScreen(
                 Text(
                     text = "Apply",
                     color = Color.White,
-                    fontSize = 18.sp,
+                    fontSize = 16.sp,
                     modifier = Modifier.fillMaxWidth(),
                     fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
                 Spacer(modifier = Modifier.width(8.dp))
             }

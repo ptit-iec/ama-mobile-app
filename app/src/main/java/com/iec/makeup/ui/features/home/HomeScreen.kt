@@ -38,8 +38,11 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -57,6 +60,7 @@ import com.iec.makeup.ui.features.home.helpers.OrderStatusType
 import com.iec.makeup.ui.theme.ColorDB7093
 import com.iec.makeup.ui.theme.ColorFAF9F9
 import com.iec.makeup.ui.theme.ColorFF69B4
+import com.iec.makeup.ui.theme.onPrimaryColor
 
 
 /*
@@ -71,7 +75,7 @@ fun HomeScreen(
     navToAllMakeUpArtist: () -> Unit = {},
     navToPersonalInfo: (String) -> Unit = {},
     navToChatting: () -> Unit = {},
-    navToAllTemplate: (String, List<String>) -> Unit ,
+    navToAllTemplate: (String, List<String>) -> Unit,
     navToAI: () -> Unit = {}
 ) {
     val context = LocalContext.current
@@ -86,6 +90,7 @@ fun HomeScreen(
         navToPersonalInfo = navToPersonalInfo,
         navToChatting = navToChatting,
         navToAllTemplate = navToAllTemplate,
+        navToAI = navToAI,
         state = state.value
     )
     appState.setLoading(state.value.isLoading)
@@ -99,7 +104,7 @@ fun AuraBeautyApp(
     navToAllMakeUp: () -> Unit = {},
     navToPersonalInfo: (String) -> Unit = {},
     navToChatting: () -> Unit = {},
-    navToAllTemplate: (String, List<String>) -> Unit = {_,_ -> },
+    navToAllTemplate: (String, List<String>) -> Unit = { _, _ -> },
     state: HomeScreenState = HomeScreenState(),
     navToAI: () -> Unit = {}
 ) {
@@ -135,8 +140,7 @@ fun AuraBeautyApp(
                 showChat = navToChatting,
                 showSearch = navToSearch,
                 image = state.userProfile?.avatar
-                    ?: "https://blog.maika.ai/wp-content/uploads/2024/02/anh-meo-meme-2.jpg"
-                ,
+                    ?: "https://blog.maika.ai/wp-content/uploads/2024/02/anh-meo-meme-2.jpg",
                 name = state.userProfile?.name ?: "User"
             )
             // Content
@@ -258,11 +262,14 @@ fun AuraBeautyApp(
                     modifier = Modifier.height(8.dp)
                 )
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp, horizontal = 16.dp).clickable {
-                        navToAI()
-                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp, horizontal = 16.dp)
+                        .clickable {
+                            navToAI()
+                        },
                     horizontalArrangement = Arrangement.Center
-                ){
+                ) {
                     Card(
                         modifier = Modifier
                             .wrapContentWidth(),
@@ -273,7 +280,14 @@ fun AuraBeautyApp(
                         )
                     ) {
                         Row(
-                            modifier = Modifier.fillMaxWidth().fillMaxHeight().padding(horizontal = 8.dp, vertical = 8.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+
+                                .fillMaxHeight()
+                                .padding(horizontal = 8.dp, vertical = 8.dp)
+                                .clickable {
+                                    navToAI()
+                                },
                             horizontalArrangement = Arrangement.Center,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -308,19 +322,22 @@ fun AuraBeautyApp(
                     Text(
                         text = stringResource(R.string.makeup_layout),
                         fontWeight = FontWeight.Medium,
-                        fontSize = 18.sp,
+                        fontSize = 16.sp,
                         modifier = Modifier.padding(top = 12.dp, bottom = 12.dp)
                     )
-                    Text(
-                        text = stringResource(R.string.see_all),
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 14.sp,
-                        color = ColorFF69B4,
-                        modifier = Modifier
-                            .padding(top = 12.dp, bottom = 12.dp)
-                            .clickable {
-                            }
-                    )
+//                    Text(
+//                        text = stringResource(R.string.see_all),
+//                        fontWeight = FontWeight.Medium,
+//                        fontSize = 14.sp,
+//                        color = onPrimaryColor,
+//                        style = TextStyle(
+//                            textDecoration = TextDecoration.Underline
+//                        ),
+//                        modifier = Modifier
+//                            .padding(top = 12.dp, bottom = 12.dp)
+//                            .clickable {
+//                            }
+//                    )
                 }
 
                 if (state.listMakeUpTemplateCategory.isEmpty()) {
@@ -360,14 +377,17 @@ fun AuraBeautyApp(
                     Text(
                         text = stringResource(R.string.expert),
                         fontWeight = FontWeight.Medium,
-                        fontSize = 18.sp,
+                        fontSize = 16.sp,
                         modifier = Modifier.padding(top = 12.dp, bottom = 12.dp)
                     )
                     Text(
                         text = stringResource(R.string.see_all),
                         fontWeight = FontWeight.Medium,
                         fontSize = 14.sp,
-                        color = ColorFF69B4,
+                        color = onPrimaryColor,
+                        style = TextStyle(
+                            textDecoration = TextDecoration.Underline
+                        ),
                         modifier = Modifier
                             .padding(top = 12.dp, bottom = 12.dp)
                             .clickable {
