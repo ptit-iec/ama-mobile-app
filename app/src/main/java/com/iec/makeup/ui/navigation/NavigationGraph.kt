@@ -39,19 +39,15 @@ import com.iec.makeup.ui.features.home.screen_expert_detail_information.ProfileS
 import com.iec.makeup.ui.features.home.screen_notification.NotificationContent
 import com.iec.makeup.ui.features.home.screen_search.SearchScreen
 import com.iec.makeup.ui.features.profiles.UserProfileScreenStateful
-import com.iec.makeup.ui.navigation.NavigationArguments.ARG_INITIAL_PROMPT
+import com.iec.makeup.ui.features.profiles.booking_history.ScreenBookingHistory
+import com.iec.makeup.ui.features.profiles.booking_history.ScreenBookingHistoryStateful
+import com.iec.makeup.ui.navigation.Routes.Companion.ARG_INITIAL_LIST_PROMPT
+import com.iec.makeup.ui.navigation.Routes.Companion.ARG_INITIAL_PROMPT
 import com.iec.makeup.ui.navigation.Routes.Companion.INTERACTION_IMAGE
 import com.iec.makeup.ui.navigation.Routes.Companion.INTERACTION_MAKEUP_TYPE
 import com.iec.makeup.ui.navigation.Routes.Companion.INTERACTION_PROMPT
 import com.iec.makeup.ui.navigation.custom_nav_type.CustomNavType
 import kotlinx.serialization.json.Json
-
-
-object NavigationArguments {
-    const val ARG_INITIAL_PROMPT = "initialPrompt"
-}
-
-const val ARG_INITIAL_LIST_PROMPT = "initialListPrompt"
 
 
 @SuppressLint("UnrememberedGetBackStackEntry")
@@ -330,8 +326,12 @@ fun NavigationGraph(
                 // Pass id then query by this id, not pass the Item
                 ScreenDetailTemplateLayoutStateful(
                     item = makeUpLayout!!,
-                    onApplyTemplate = {
-                        navController.navigate(Routes.Page2.createRoute())
+                    onApplyTemplate = { item ->
+                        navController.navigate(
+                            Routes.Page2.createRoute(
+                                initPrompt = item.description ?: ""
+                            )
+                        )
                     },
                     onClose = {
                         navController.popBackStack()
@@ -346,21 +346,20 @@ fun NavigationGraph(
             navigation(
                 startDestination = Routes.Page2.createRoute(),
                 route = "ai",
-                arguments = listOf(
-                    navArgument(ARG_INITIAL_PROMPT) { type = NavType.StringType },
-                    navArgument(ARG_INITIAL_LIST_PROMPT) {
-                        type = NavType.StringListType
-                    }
-                )
-            ) {
-                composable(route = Routes.Page2.createRoute()) {
+
+                ) {
+                composable(
+                    route = Routes.Page2.route,
+                    arguments = listOf(
+                        navArgument(ARG_INITIAL_PROMPT) {
+                            type = NavType.StringType
+                            defaultValue = ""
+                        },
+                    )) {
                     appState.setVisibleBottomNav(true)
                     val initialPrompt: String = it.arguments?.getString(ARG_INITIAL_PROMPT) ?: ""
-                    val initialListPrompt: List<String>? =
-                        it.arguments?.getStringArrayList(ARG_INITIAL_LIST_PROMPT)
                     VirtualScreen(
                         initialPrompts = initialPrompt,
-                        randomList = initialListPrompt,
                         navBack = { navController.popBackStack() },
                         navInstruction = { navController.navigate(Routes.InstructionScreen.createRoute()) },
                         navInteraction = { prompt, image, id ->
@@ -435,7 +434,10 @@ fun NavigationGraph(
                     val parentEntry = remember { navController.getBackStackEntry("main") }
                     val viewModel: ScreenChatWithAIVM = hiltViewModel(parentEntry)
                     ScreenChatWithAI(
-                        navBack = { navController.popBackStack() },
+                        navBack = {
+                            navController.popBackStack()
+
+                                  },
                         navHome = {
                             navController.navigate(Routes.Page2.createRoute()) {
                                 popUpTo(Routes.Page2.createRoute()) {
@@ -460,7 +462,7 @@ fun NavigationGraph(
                         },
                         imageLink = image,
                         chatBotID = id,
-                        viewModel = viewModel
+                        viewModelD = viewModel
                     )
                 }
 
@@ -503,6 +505,8 @@ fun NavigationGraph(
                 composable(
                     route = Routes.ScreenUserProfile.route
                 ) {
+
+                    appState.setVisibleBottomNav(true)
                     UserProfileScreenStateful(
                         navToLogin = {
                             navController.navigate("auth") {
@@ -511,6 +515,19 @@ fun NavigationGraph(
                                 }
                                 launchSingleTop = true
                             }
+                        },
+                        navToBookingHistory = {
+                            navController.navigate(Routes.ScreenBookingHistory.createRoute())
+                        }
+                    )
+                }
+                composable(
+                    route = Routes.ScreenBookingHistory.route
+                ) {
+                    appState.setVisibleBottomNav(false)
+                    ScreenBookingHistoryStateful(
+                        navBack = {
+                            navController.popBackStack()
                         }
                     )
                 }

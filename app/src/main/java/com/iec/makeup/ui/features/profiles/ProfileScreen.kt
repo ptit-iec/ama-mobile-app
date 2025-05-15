@@ -39,7 +39,8 @@ import java.util.logging.Handler
 
 @Composable
 fun UserProfileScreenStateful(
-    navToLogin: () -> Unit = {}
+    navToLogin: () -> Unit = {},
+    navToBookingHistory: () -> Unit = {}
 ) {
     val viewModel: ProfileScreenVM = hiltViewModel()
     val state = viewModel.state.collectAsStateWithLifecycle()
@@ -49,7 +50,8 @@ fun UserProfileScreenStateful(
         state = state.value,
         onLogout = {
             isLoggingOut = true
-        }
+        },
+        navToBookingHistory = navToBookingHistory
     )
     if (isLoggingOut) {
         DialogCompose(
@@ -76,7 +78,8 @@ fun UserProfileScreenStateful(
 @Composable
 fun UserProfileScreen(
     state: ProfileScreenState = ProfileScreenState(),
-    onLogout: () -> Unit = {}
+    onLogout: () -> Unit = {},
+    navToBookingHistory: () -> Unit = {}
 ) {
     Scaffold(
         topBar = {
@@ -115,7 +118,8 @@ fun UserProfileScreen(
 
             // Grid of Buttons
             ActionButtonsGrid(
-                onLogout = onLogout
+                onLogout = onLogout,
+                navToBookingHistory = { navToBookingHistory() }
             )
         }
     }
@@ -193,7 +197,8 @@ fun ActionButton(icon: ImageVector, text: String, onClick: () -> Unit) {
 
 @Composable
 fun ActionButtonsGrid(
-    onLogout: () -> Unit = {}
+    onLogout: () -> Unit = {},
+    navToBookingHistory: () -> Unit = {}
 ) {
     // Using nested Rows and Columns for a fixed 2x3 grid
     Column(
@@ -207,7 +212,9 @@ fun ActionButtonsGrid(
             ActionButton(
                 icon = Icons.Default.ShoppingCart,
                 text = "Lịch hẹn với\nchuyên gia",
-                onClick = { /* TODO: Handle click */ })
+                onClick = {
+                    navToBookingHistory()
+                })
             ActionButton(
                 icon = Icons.Default.Refresh,
                 text = "Lịch sử\nhoạt động",

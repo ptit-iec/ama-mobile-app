@@ -108,8 +108,8 @@ sealed class Routes(
     /*
     -- Route /main/ai --
      */
-    data object Page2 : Routes("analyze") {
-        fun createRoute() = "analyze"
+    data object Page2 : Routes("analyze/{${ARG_INITIAL_PROMPT}}") {
+        fun createRoute(initPrompt: String = "") = "analyze/$initPrompt"
     }
 
     data object InstructionScreen : Routes("instruction") {
@@ -148,6 +148,10 @@ sealed class Routes(
         fun createRoute() = "account"
     }
 
+    data object ScreenBookingHistory : Routes("booking_history") {
+        fun createRoute() = "booking_history"
+    }
+
     // ----------------------------------------------------------------------------
 
     /*
@@ -174,5 +178,9 @@ sealed class Routes(
         const val QUESTION_ID = "question_id"
 
         const val EXPERT_ID = "expert_id"
+
+
+        const val ARG_INITIAL_PROMPT = "initialPrompt"
+        const val ARG_INITIAL_LIST_PROMPT = "initialListPrompt"
     }
 }

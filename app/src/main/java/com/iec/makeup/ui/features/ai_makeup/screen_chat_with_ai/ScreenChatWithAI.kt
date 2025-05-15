@@ -69,9 +69,9 @@ fun ScreenChatWithAI(
     navHome: () -> Unit = {},
     navToInstruction: () -> Unit = {},
     navToExpertsRcm: (String) -> Unit = {},
-    viewModel: ScreenChatWithAIVM
+    viewModelD: ScreenChatWithAIVM
 ) {
-
+    val viewModel = hiltViewModel<ScreenChatWithAIVM>()
     var imageFullView by remember { mutableStateOf<String?>(null) }
     val state = viewModel.state.collectAsStateWithLifecycle()
     val effect = viewModel.effect.collectAsStateWithLifecycle(initialValue = null)
@@ -201,7 +201,7 @@ fun ScreenChatStateless(
                 )
                 if (state.isBotTyping) {
                     Text(
-                        text = "BOT is typing ...",
+                        text = "GlamAura is typing...",
                         modifier = Modifier
                             .align(Alignment.BottomCenter)
                             .padding(bottom = 8.dp),

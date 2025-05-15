@@ -185,6 +185,7 @@ class ScreenChatWithAIVM @Inject constructor(
                 val botMessage = result.data?.botMessage
                 trySend(botMessage)
                 sendEvent(ScreenChatWithAIEvent.OnBotTyping(false))
+                close()
             }
         } else {
             try {
@@ -200,6 +201,7 @@ class ScreenChatWithAIVM @Inject constructor(
                     val botMessage = result.data?.botMessage
                     trySend(botMessage)
                     sendEvent(ScreenChatWithAIEvent.OnBotTyping(false))
+                    close()
                 }
             } catch (e: Exception) {
                 sendEventWithEffect(ScreenChatWithAIEvent.OnError("Không thể gửi tin nhắn đến AI. Vui lòng thử lại sau."))

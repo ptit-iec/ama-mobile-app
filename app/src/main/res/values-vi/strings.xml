@@ -8,4 +8,6 @@
     <string name="book">Đặt lịch</string>
     <string name="see_profile">Xem hồ sơ</string>
     <string name="describe_expectation">Mô tả mong muốn mẫu makeup</string>
+    <string name="booking_history">Lịch hẹn</string>
+    <string name="booking_detail">Thông tin chi tiết</string>
 </resources>

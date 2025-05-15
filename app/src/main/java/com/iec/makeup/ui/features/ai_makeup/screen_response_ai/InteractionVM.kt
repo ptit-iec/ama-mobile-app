@@ -82,7 +82,7 @@ class InteractionVM @Inject constructor(
         fun getInitResponse(chatbotRequest: ChatbotRequest){
             sendEvent(InteractionEvent.OnLoading(true))
             initResponse(chatbotRequest)
-                .timeout((30_000).milliseconds)
+                .timeout((50_000).milliseconds)
                 .catch { e ->
                     sendEventWithEffect(InteractionEvent.OnShowError(e.message))
                 }

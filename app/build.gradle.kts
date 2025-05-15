@@ -1,3 +1,5 @@
+import com.android.build.gradle.api.ApkVariantOutput
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -12,10 +14,9 @@ kapt {
 android {
     namespace = "com.iec.makeup"
     compileSdk = 35
-
     defaultConfig {
         applicationId = "com.iec.makeup"
-        minSdk = 28
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -34,6 +35,11 @@ android {
                 "proguard-rules.pro"
             )
         }
+        debug {
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-debug"
+            isDebuggable = true
+        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -51,6 +57,16 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+    }
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            val apkOutput = output as? ApkVariantOutput
+            if (variant.buildType.name == "debug") {
+                val newApkName = "${rootProject.name}-${variant.versionName}-debug.apk"
+                apkOutput?.outputFileName = newApkName // Try assigning here
+            }
+            true
         }
     }
 }
