@@ -102,7 +102,7 @@ fun InProgressBookItem(
             ) {
                 // Name
                 Text(
-                    text = data,
+                    text = data.name,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     color = nameColor
@@ -113,7 +113,7 @@ fun InProgressBookItem(
                 ) {
                     // Service description
                     Text(
-                        text = "Makeup dự tiệc, tại nhà",
+                        text = data.type,
                         fontSize = 14.sp,
                         color = textColorSecondary
                     )
@@ -134,7 +134,7 @@ fun InProgressBookItem(
                         color = textColorPrimary
                     )
                     Text(
-                        text = "350.000 VND",
+                        text = "${data.totalBill} VND",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         color = textColorPrimary
@@ -147,7 +147,7 @@ fun InProgressBookItem(
                         color = textColorPrimary
                     )
                     Text(
-                        text = "0426584235",
+                        text = data.phone,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         color = textColorPrimary
@@ -161,7 +161,7 @@ fun InProgressBookItem(
                         color = textColorPrimary
                     )
                     Text(
-                        text = "64 Hoàng quốc việt, cổ nhuế, cầu giấy, hà nội",
+                        text = data.address,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         color = textColorPrimary
@@ -172,7 +172,7 @@ fun InProgressBookItem(
                 Button(
                     onClick = { /* Handle button click */ },
                     colors = ButtonDefaults.buttonColors(
-                        backgroundColor = ColorD, contentColor = buttonColor),
+                        backgroundColor = ColorDB7093, contentColor = buttonColor),
                     shape = RoundedCornerShape(16.dp),
                     modifier = Modifier
                         .padding(top = 8.dp)

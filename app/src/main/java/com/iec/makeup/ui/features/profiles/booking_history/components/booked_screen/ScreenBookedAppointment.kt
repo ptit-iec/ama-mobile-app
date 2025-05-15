@@ -133,7 +133,9 @@ fun BookedItem(
                 Spacer(modifier = Modifier.height(8.dp))
                 Button(
                     onClick = { /* Handle click */ },
-                    colors = ButtonDefaults.buttonColors(contentColor = ColorDB7093),
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = ColorDB7093,
+                        contentColor = ColorDB7093),
                     shape = RoundedCornerShape(5.dp),
                     modifier = Modifier
                         .height(36.dp)

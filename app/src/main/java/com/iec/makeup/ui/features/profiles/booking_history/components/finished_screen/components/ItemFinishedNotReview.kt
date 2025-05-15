@@ -105,6 +105,7 @@ fun ItemFinishedNotReview(
                     onClick = { /* Handle click */ },
                     colors = ButtonDefaults.buttonColors(
                         contentColor = ColorDB7093,
+                        backgroundColor = ColorDB7093
                         ),
                     shape = RoundedCornerShape(5.dp),
                     modifier = Modifier
