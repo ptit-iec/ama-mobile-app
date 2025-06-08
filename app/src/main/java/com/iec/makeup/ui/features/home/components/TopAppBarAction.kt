@@ -54,7 +54,8 @@ fun TopAppBar(
     showSearch: () -> Unit = {},
     showNotifications: () -> Unit = {},
     showChat: () -> Unit = {},
-    image: String
+    image: String,
+    name: String = "Ngo Tuan Anh",
 ) {
     Row(
         modifier = Modifier
@@ -78,65 +79,77 @@ fun TopAppBar(
                     model = image,
                     contentDescription = "Logo",
                     contentScale = ContentScale.FillHeight
-                    )
+                )
             }
             Spacer(modifier = Modifier.size(8.dp))
-            if (DateTimeUtils.getCurrentDateTime().isMorning()) {
-                Text(
-                    text = "Good morning",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = FontFamily(
-                        Font(R.font.montserrat)
-                    ),
-                    modifier = Modifier.padding(vertical = 16.dp),
-                    color = Color.White
-                )
-            } else {
-                Text(
-                    text = "Good noon",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = FontFamily(
-                        Font(R.font.montserrat)
-                    ),
-                    modifier = Modifier.padding(vertical = 16.dp),
-                    color = Color.White
-                )
-            }
+//            if (DateTimeUtils.getCurrentDateTime().isMorning()) {
+//                Text(
+//                    text = "Good morning",
+//                    fontSize = 16.sp,
+//                    fontWeight = FontWeight.Bold,
+//                    fontFamily = FontFamily(
+//                        Font(R.font.montserrat)
+//                    ),
+//                    modifier = Modifier.padding(vertical = 16.dp),
+//                    color = Color.White
+//                )
+//            } else {
+//                Text(
+//                    text = "Good noon",
+//                    fontSize = 16.sp,
+//                    fontWeight = FontWeight.Bold,
+//                    fontFamily = FontFamily(
+//                        Font(R.font.montserrat)
+//                    ),
+//                    modifier = Modifier.padding(vertical = 16.dp),
+//                    color = Color.White
+//                )
+//            }
+            Text(
+                text = name,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily(
+                    Font(R.font.montserrat)
+                ),
+                modifier = Modifier.padding(vertical = 16.dp),
+                color = Color.White
+            )
+
         }
         // Right Icons
-        Row {
-            Icon(
-                imageVector = Icons.Outlined.Search,
-                contentDescription = "Compare",
-                modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .clickable {
-                        showSearch()
-                    },
-                tint = Color.White
-            )
-            Icon(
-                imageVector = Icons.Outlined.NotificationsNone,
-                contentDescription = "Notifications",
-                modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .clickable {
-                        showNotifications()
-                    },
-                tint = Color.White
-            )
-            Icon(
-                imageVector = Icons.Outlined.Chat,
-                contentDescription = "Settings",
-                modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .clickable {
-                        showChat()
-                    },
-                tint = Color.White
-            )
-        }
+        Icon(
+            imageVector = Icons.Outlined.NotificationsNone,
+            contentDescription = "Notifications",
+            modifier = Modifier
+                .padding(horizontal = 8.dp)
+                .clickable {
+                    showNotifications()
+                },
+            tint = Color.White
+        )
+//        Row {
+//            Icon(
+//                imageVector = Icons.Outlined.Search,
+//                contentDescription = "Compare",
+//                modifier = Modifier
+//                    .padding(horizontal = 8.dp)
+//                    .clickable {
+//                        showSearch()
+//                    },
+//                tint = Color.White
+//            )
+//
+//            Icon(
+//                imageVector = Icons.Outlined.Chat,
+//                contentDescription = "Settings",
+//                modifier = Modifier
+//                    .padding(horizontal = 8.dp)
+//                    .clickable {
+//                        showChat()
+//                    },
+//                tint = Color.White
+//            )
+//        }
     }
 }

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="makeup_experiment">Trải nghiệm Makeup từ AI</string>
+    <string name="instructions">Hướng dẫn\n</string>
+    <string name="booking">Đặt lịch với chuyên gia</string>
+    <string name="recommend_makeup">Gợi ý makeup</string>
+    <string name="chat_with_ai">Chat với AI</string>
+    <string name="book">Đặt lịch</string>
+    <string name="see_profile">Xem hồ sơ</string>
+    <string name="describe_expectation">Mô tả mong muốn mẫu makeup</string>
+    <string name="booking_history">Lịch hẹn</string>
+    <string name="booking_detail">Thông tin chi tiết</string>
+</resources>

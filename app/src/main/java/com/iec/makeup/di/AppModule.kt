@@ -1,40 +1,41 @@
 package com.iec.makeup.di
 
-import android.graphics.Insets.add
 import com.iec.makeup.core.DataStoreInterface
 import com.iec.makeup.core.PersistentState
-import com.iec.makeup.core.PreferenceKeys
 import com.iec.makeup.core.network.AuthInterceptorWithToken
 import com.iec.makeup.core.network.TokenManager
 import com.iec.makeup.core.utils.Constants.BASE_URL
 import com.iec.makeup.core.utils.Constants.TIME_OUT
 import com.iec.makeup.data.remote.api.AuthEndpoint
+import com.iec.makeup.data.remote.api.ChatbotEndpoint
+import com.iec.makeup.data.remote.api.ExpertEndpoint
 import com.iec.makeup.data.remote.api.MakeUpTempCategoryEndpoint
 import com.iec.makeup.data.remote.api.MakeUpTemplateEndpoint
+import com.iec.makeup.data.remote.api.ProfileEndpoint
+import com.iec.makeup.data.remote.api.PromptEndpoint
 import com.iec.makeup.data.remote.api.UserEndpoint
-import com.iec.makeup.data.remote.repository.MakeUpTemplateCategoryImpl
-import com.iec.makeup.data.remote.repository.MakeUpTemplateRepositoryImpl
-import com.iec.makeup.data.remote.repository.MessageChatRemoteImpl
+import com.iec.makeup.data.repository_implement.ExpertRepositoryImpl
+import com.iec.makeup.data.repository_implement.MakeUpTemplateCategoryImpl
+import com.iec.makeup.data.repository_implement.MakeUpTemplateRepositoryImpl
+import com.iec.makeup.data.repository_implement.MessageChatRemoteImpl
 import com.iec.makeup.data.repository.AuthRepository
 import com.iec.makeup.data.repository.AuthRepositoryImpl
+import com.iec.makeup.data.repository.BookingRepository
+import com.iec.makeup.data.repository.ExpertRepository
 import com.iec.makeup.data.repository.MakeUpTemplateCategoryRepository
 import com.iec.makeup.data.repository.MakeUpTemplateRepository
 import com.iec.makeup.data.repository.MessageChatRepository
+import com.iec.makeup.data.repository_implement.BookingRepositoryImpl
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import io.ktor.http.headers
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import java.time.Duration
 import java.util.concurrent.TimeUnit
 import javax.inject.Named
 import javax.inject.Singleton
@@ -95,6 +96,7 @@ class AppModule {
             .addInterceptor(loggingInterceptor)
             .addInterceptor(authInterceptor)
             .connectTimeout(TIME_OUT, TimeUnit.MILLISECONDS)
+            .readTimeout(TIME_OUT, TimeUnit.MILLISECONDS)
             .build()
 
         return Retrofit.Builder()
@@ -128,6 +130,26 @@ class AppModule {
     fun provideMakeUpTemplateEndpoint(@Named("Auth") retrofit: Retrofit): MakeUpTemplateEndpoint =
         retrofit.create(MakeUpTemplateEndpoint::class.java)
 
+    @Provides
+    @Singleton
+    fun providePromptEndpoint(@Named("Auth") retrofit: Retrofit): PromptEndpoint =
+        retrofit.create(PromptEndpoint::class.java)
+
+
+    @Provides
+    @Singleton
+    fun provideExpertEndpoint(@Named("Auth") retrofit: Retrofit): ExpertEndpoint =
+        retrofit.create(ExpertEndpoint::class.java)
+
+    @Provides
+    @Singleton
+    fun provideAIEndpoint(@Named("Auth") retrofit: Retrofit): ChatbotEndpoint =
+        retrofit.create(ChatbotEndpoint::class.java)
+
+    @Provides
+    @Singleton
+    fun provideUserBookingEndpoint(@Named("Auth") retrofit: Retrofit): ProfileEndpoint =
+        retrofit.create(ProfileEndpoint::class.java)
 }
 
 @InstallIn(SingletonComponent::class)
@@ -148,4 +170,10 @@ abstract class ImplementationsModule {
 
     @Binds
     abstract fun bindMakeUpTemplate(makeUpTemplateImpl: MakeUpTemplateRepositoryImpl): MakeUpTemplateRepository
+
+    @Binds
+    abstract fun bindExpertRepo(expertRepositoryImpl: ExpertRepositoryImpl): ExpertRepository
+
+    @Binds
+    abstract fun bindUserBooking(userBookingImpl: BookingRepositoryImpl): BookingRepository
 }

@@ -32,25 +32,18 @@ enum class TopLevelDestination(
         route = Routes.MainHome.createRoute()
     ),
     Page2(
-        selectedIcon = R.drawable.lens_blur_24dp_df9d9b_fill0_wght400_grad0_opsz24,
-        unSelectedIcon = R.drawable.lens_blur_24dp_df9d9b_fill0_wght400_grad0_opsz24,
+        selectedIcon = R.drawable.ai,
+        unSelectedIcon = R.drawable.ai,
         iconText = R.string.page2,
         titleTextId = R.string.page2_title,
         route = Routes.Page2.createRoute()
-    ),
-    Page3(
-        selectedIcon = R.drawable.shopping_cart_24dp_df9d9b_fill1_wght400_grad0_opsz24,
-        unSelectedIcon = R.drawable.shopping_cart_24dp_df9d9b_fill0_wght400_grad0_opsz24,
-        iconText = R.string.page3,
-        titleTextId = R.string.page3_title,
-        route = Routes.Page3.createRoute()
     ),
     Page4(
         selectedIcon = R.drawable.account_circle_24dp_df9d9b_fill1_wght400_grad0_opsz24,
         unSelectedIcon = R.drawable.account_circle_24dp_df9d9b_fill0_wght400_grad0_opsz24,
         iconText = R.string.page4,
         titleTextId = R.string.page4_title,
-        route = Routes.Page4.createRoute()
+        route = Routes.ScreenUserProfile.createRoute()
     )
 
 }
@@ -101,51 +94,93 @@ sealed class Routes(
     }
 
     data object MainAllMakeUpTemplate :
-        Routes("home/all_makeup_template/{${MAKE_UP_CATEGORY_ID}}") {
-        fun createRoute(makeupCategoryID: List<String>) = "home/all_makeup_template/$makeupCategoryID"
+        Routes("home/all_makeup_template/{$MAKE_UP_TITLE_ID}/{${MAKE_UP_CATEGORY_ID}}") {
+        fun createRoute(title: String, makeupCategoryID: List<String>) = "home/all_makeup_template/$title/${makeupCategoryID.joinToString(",")}"
 
     }
 
     data object MailDetailMakeUpTemplate :
         Routes("home/makeup_template_id/{${MAKE_UP_TEMPLATE_ID}}") {
         fun createRoute(makeupCategoryID: String) = "home/makeup_template_id/$makeupCategoryID"
-
     }
 
+    // ----------------------------------------------------------------------------
     /*
     -- Route /main/ai --
      */
-    data object Page2 : Routes("analyze") {
-        fun createRoute() = "analyze"
+    data object Page2 : Routes("analyze/{${ARG_INITIAL_PROMPT}}") {
+        fun createRoute(initPrompt: String = "") = "analyze/$initPrompt"
     }
 
     data object InstructionScreen : Routes("instruction") {
         fun createRoute() = "analyze/instruction"
     }
 
-    data object ScreenChatWithAIRoute: Routes("chat_with_ai") {
-        fun createRoute() = "chat_with_ai"
+    // Require image send to AI for the first message
+    data object ScreenChatWithAIRoute: Routes("chat_with_ai/{${CONVERSATION_ID}}/{${IMAGE_INIT_ID}}") {
+        fun createRoute(id: String, image: String) = "chat_with_ai/$id/$image"
     }
 
-    data object ScreenInteractionRoutes: Routes("interaction") {
-        fun createRoute() = "interaction"
+    data object ScreenInteractionRoutes:
+        Routes("interaction/{$INTERACTION_PROMPT}/{$INTERACTION_IMAGE}/{$INTERACTION_MAKEUP_TYPE}") {
+        fun createRoute(
+            interactionPrompt: String,
+            interactionImage: String,
+            interactionMakeupType: String
+        ) = "interaction/$interactionPrompt/$interactionImage/$interactionMakeupType"
     }
 
+    data object ScreenMakeUpInstruction: Routes("makeup_instruction") {
+        fun createRoute() = "makeup_instruction"
+    }
+
+    data object ScreenExpertsRecommended: Routes("experts_recommended/{${QUESTION_ID}}") {
+        fun createRoute(id: String) = "experts_recommended/$id"
+    }
+
+    // ----------------------------------------------------------------------------
 
     /*
-    -- Route page3
+    -- Route /main/profile --
      */
-    data object Page3 : Routes("shopping") {
-        fun createRoute() = "shopping"
+
+    data object ScreenUserProfile : Routes("account") {
+        fun createRoute() = "account"
     }
 
-    data object Page4 : Routes("account") {
-        fun createRoute() = "account"
+    data object ScreenBookingHistory : Routes("booking_history") {
+        fun createRoute() = "booking_history"
+    }
+
+    // ----------------------------------------------------------------------------
+
+    /*
+    -- Route /booking_expert --
+     */
+
+    data object ScreenBookingExpert : Routes("booking_expert/{${EXPERT_ID}}") {
+        fun createRoute(id: String) = "booking_expert/$id"
     }
 
     companion object {
         const val MAKE_UP_STYLIST_ID = "makeup_stylist_id"
         const val MAKE_UP_CATEGORY_ID = "makeup_category_id"
+        const val MAKE_UP_TITLE_ID = "makeup_title_id"
         const val MAKE_UP_TEMPLATE_ID = "makeup_template_id"
+
+        const val INTERACTION_PROMPT = "interaction_prompt"
+        const val INTERACTION_IMAGE = "interaction_image"
+        const val INTERACTION_MAKEUP_TYPE = "interaction_makeup_type"
+
+        const val CONVERSATION_ID = "conversation_id"
+        const val IMAGE_INIT_ID = "image_id"
+
+        const val QUESTION_ID = "question_id"
+
+        const val EXPERT_ID = "expert_id"
+
+
+        const val ARG_INITIAL_PROMPT = "initialPrompt"
+        const val ARG_INITIAL_LIST_PROMPT = "initialListPrompt"
     }
 }

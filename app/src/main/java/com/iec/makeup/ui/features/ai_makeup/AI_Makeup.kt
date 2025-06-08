@@ -4,7 +4,9 @@ import android.Manifest
 import android.content.Context
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -53,8 +55,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -68,6 +72,7 @@ import com.iec.makeup.R
 import com.iec.makeup.core.ui.AtomicLoadingDialog
 import com.iec.makeup.core.ui.DialogCompose
 import com.iec.makeup.core.ui.IECTextField
+import com.iec.makeup.ui.LocalAppState
 import com.iec.makeup.ui.features.ai_makeup.business.AIScreenEffect
 import com.iec.makeup.ui.features.ai_makeup.business.AIScreenState
 import com.iec.makeup.ui.features.ai_makeup.business.AIScreenVM
@@ -85,15 +90,14 @@ fun VirtualScreen(
     initialPrompts: String = "",
     randomList: List<String>? = null,
     navInstruction: () -> Unit = {},
-    navInteraction: (String) -> Unit = {}
+    navInteraction: (String, String, String) -> Unit = { _, _, _ -> }
 ) {
     val context = LocalContext.current
     val viewModel: AIScreenVM = hiltViewModel()
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val state = viewModel.state.collectAsStateWithLifecycle()
     val effect = viewModel.effect.collectAsStateWithLifecycle(null)
-
-    /*
+    val appState = LocalAppState.current/*
      - Handle permission
      */
     val cameraPermissionState = rememberPermissionState(permission = Manifest.permission.CAMERA)
@@ -102,11 +106,9 @@ fun VirtualScreen(
     var permissionRequestCompleted by rememberSaveable { mutableStateOf(false) }
 
 
-    val file = File(context.cacheDir, "captured_image.jpg")
+    val file = File(context.cacheDir, "${System.currentTimeMillis()}.jpg")
     val uri = FileProvider.getUriForFile(
-        context,
-        "${context.packageName}.provider",
-        file
+        context, "${context.packageName}.provider", file
     )
 
     val cameraLauncher = rememberLauncherForActivityResult(
@@ -116,6 +118,16 @@ fun VirtualScreen(
             viewModel.captureImage(uri ?: Uri.EMPTY)
         } else {
             viewModel.showError("Image capture failed")
+        }
+    }
+
+    val pickMedia = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { filePath ->
+        if (filePath != null) {
+            viewModel.uploadImage(filePath)
+        } else {
+            viewModel.showError("Image selection failed")
         }
     }
 
@@ -134,12 +146,9 @@ fun VirtualScreen(
     }
 
     LaunchedEffect(Unit) {
-        if (initialPrompts.isNotEmpty()) {
-            viewModel.onInitData(
-                randomList ?: emptyList(),
-                initialPrompts
-            )
-        }
+        viewModel.onInitData(
+            randomList ?: emptyList(), initialPrompts
+        )
     }
     LaunchedEffect(effect) {
         effect.value?.let {
@@ -154,37 +163,37 @@ fun VirtualScreen(
         }
     }
     AIMakeupScreen(
-        initialPrompts,
         navInstruction,
         state = state.value,
-        uploadImage = viewModel::uploadImage,
-        onApply = navInteraction,
+        uploadImage = {
+            pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+        },
+        onApply = {
+            viewModel.submitImageToServer(state.value.imageURL)
+            {
+                navInteraction(
+                    state.value.requestDescription ?: "",
+                    Uri.encode(it) ?: "",
+                    "6802056530135d4049a8a6d4"
+                )
+            }
+        },
         inputDescription = viewModel::inputDescription,
         launchCamera = { cameraLauncher.launch(uri) },
         deletePicture = viewModel::onDeleteImage,
+        randomPrompt = viewModel::onRandomPrompt
     )
-    if (state.value.isLoading) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            AtomicLoadingDialog()
-        }
-    }
+    appState.setLoading(state.value.isLoading)
+
     if (errorMessage != null) {
         Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
+            modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
         ) {
-            DialogCompose(
-                text = errorMessage!!,
-                onCloseAction = {
-                    errorMessage = null
-                },
-                positiveAction = {
-                    errorMessage = null
-                }
-            )
+            DialogCompose(text = errorMessage!!, onCloseAction = {
+                errorMessage = null
+            }, positiveAction = {
+                errorMessage = null
+            })
         }
     }
 
@@ -199,21 +208,21 @@ private fun AIPreview() {
 // Too lazy for separating these components :0
 @Composable
 fun AIMakeupScreen(
-    initialPrompts: String = "",
     navInstruction: () -> Unit = {},
     state: AIScreenState = AIScreenState(),
-    uploadImage: (uri: Uri) -> Unit = {},
+    uploadImage: () -> Unit = {},
     deletePicture: () -> Unit = {},
     inputDescription: (description: String) -> Unit = {},
     onApply: (String) -> Unit = {},
-    launchCamera: () -> Unit = {}
+    launchCamera: () -> Unit = {},
+    randomPrompt: () -> Unit = {}
 ) {
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
-            .padding(bottom = 16.dp), // Light pink background for the entire app
+            .padding(bottom = 24.dp), // Light pink background for the entire app
         contentAlignment = Alignment.BottomCenter,
     ) {
 
@@ -240,8 +249,7 @@ fun AIMakeupScreen(
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                     modifier = Modifier.clickable {
                         navInstruction()
-                    }
-                ) {
+                    }) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
@@ -295,9 +303,7 @@ fun AIMakeupScreen(
                     modifier = Modifier
                         .clip(RoundedCornerShape(20.dp))
                         .border(
-                            width = 2.dp,
-                            color = ColorFFC1CC,
-                            shape = RoundedCornerShape(20.dp)
+                            width = 2.dp, color = ColorFFC1CC, shape = RoundedCornerShape(20.dp)
                         ),
                     elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
                     colors = CardDefaults.cardColors(
@@ -344,103 +350,87 @@ fun AIMakeupScreen(
                                 contentDescription = "Play",
                                 tint = Color.DarkGray,
                                 modifier = Modifier.clickable {
-                                    uploadImage(state.imageURL ?: Uri.EMPTY)
-                                }
-                            )
+                                    uploadImage()
+                                })
                             Icon(
                                 imageVector = Icons.Outlined.CameraAlt,
                                 contentDescription = "Play",
                                 tint = Color.DarkGray,
                                 modifier = Modifier.clickable {
                                     launchCamera()
-                                }
-                            )
+                                })
                             Icon(
                                 imageVector = Icons.Outlined.Delete,
                                 contentDescription = "Play",
                                 tint = Color.DarkGray,
                                 modifier = Modifier.clickable {
                                     deletePicture()
-                                }
-                            )
+                                })
                         }
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // Description card with improved styling
+            Text(
+                text = stringResource(R.string.describe_expectation),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .align(Alignment.CenterHorizontally),
+                fontSize = 12.sp,
+                textAlign = TextAlign.Center,
+                color = Color.DarkGray
+            )
+            Spacer(modifier = Modifier.height(10.dp))
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                colors = CardDefaults.cardColors(containerColor = ColorDB7093),
-                shape = RoundedCornerShape(24.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                    .padding(vertical = 8.dp, horizontal = 16.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                shape = RoundedCornerShape(16.dp),
+                border = BorderStroke(1.dp, ColorDB7093),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    // Description title with badge-like design
-                    Surface(
-                        shape = RoundedCornerShape(8.dp),
-                        color = Color.White.copy(alpha = 0.2f),
-                        modifier = Modifier.wrapContentWidth()
-                    ) {
-                        Text(
-                            text = "Description",
-                            color = Color.White,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Medium,
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    // User request card with improved text field
-                    Card(
+                Column(modifier = Modifier.padding(vertical = 12.dp, horizontal = 4.dp)) {
+                    IECTextField(
+                        placeholder = " Makeup nhẹ nhàng với lớp nền mỏng mịn, má hồng và môi tông hồng đào, kẻ mắt mảnh kết hợp mi cong tự nhiên tạo vẻ trong trẻo, nữ tính",
+                        value = state.requestDescription ?: "",
+                        onValueChange = {
+                            inputDescription(it)
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 8.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.White),
-                        shape = RoundedCornerShape(16.dp),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                    ) {
-                        Column(modifier = Modifier.padding(4.dp)) {
-                            IECTextField(
-                                placeholder = "Tôi muốn makeup tông hồng, da tôi da trắng, tóc vàng hôm nay tôi đi date với người yêu, tôi mặc 1 chiếc váy trắng với phong cách bánh bèo, trông nhẹ nhàng nữ tính",
-                                value = state.requestDescription ?: "",
-                                onValueChange = {
-                                    inputDescription(it)
-                                },
+                            .height(120.dp)
+                            .padding(4.dp)
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ){
+                        Row(
+                            modifier = Modifier
+                                .padding(horizontal = 8.dp)
+                                .clickable {
+                                    randomPrompt()
+                                }, verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Shuffle,
+                                contentDescription = "Shuffle",
+                                tint = Color.DarkGray,
                                 modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(120.dp)
-                                    .padding(4.dp)
+                                    .size(24.dp)
+                                    .clickable {})
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Ngẫu nhiên", fontSize = 14.sp
                             )
-                            Row(
-                                modifier = Modifier.padding(horizontal = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Shuffle,
-                                    contentDescription = "Shuffle",
-                                    tint = Color.DarkGray,
-                                    modifier = Modifier
-                                        .size(24.dp)
-                                        .clickable {
-                                        }
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = "Ngẫu nhiên",
-                                    fontSize = 14.sp
-                                )
-
-                            }
                         }
+                        Text(
+                            text = "${state.requestDescription?.length ?: 0}/2000 ký tự", fontSize = 14.sp,
+                            modifier = Modifier.padding(end = 18.dp)
+                        )
                     }
                 }
             }
@@ -462,7 +452,7 @@ fun AIMakeupScreen(
                 containerColor = ColorFFC1CC
             ),
             shape = RoundedCornerShape(16.dp),
-            elevation = ButtonDefaults.buttonElevation(defaultElevation = 16.dp)
+            elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -471,10 +461,12 @@ fun AIMakeupScreen(
                 Text(
                     text = "Apply",
                     color = Color.White,
-                    fontSize = 18.sp,
+                    fontSize = 16.sp,
                     modifier = Modifier.fillMaxWidth(),
                     fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
                 Spacer(modifier = Modifier.width(8.dp))
             }

@@ -46,7 +46,7 @@ fun DialogCompose(
             .fillMaxSize()
             .background(color = Color.Black.copy(alpha = 0.8f))
             .padding(horizontal = 12.dp)
-            .clickable(){
+            .clickable() {
                 if (ableDismiss) onCloseAction()
             },
         contentAlignment = Alignment.Center
@@ -60,7 +60,9 @@ fun DialogCompose(
 
             ) {
             Column(
-                modifier = Modifier.fillMaxSize().padding(vertical = 12.dp),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(vertical = 12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
@@ -69,7 +71,7 @@ fun DialogCompose(
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Text(
-                        text = "Notice",
+                        text = "Thông báo",
                         modifier = Modifier.fillMaxWidth(),
                         textAlign = TextAlign.Center,
                         style = TextStyle(
@@ -84,7 +86,7 @@ fun DialogCompose(
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Close,
-                            contentDescription = "Close",
+                            contentDescription = "Đóng",
                             modifier = Modifier
                                 .padding(end = 12.dp)
                                 .clickable { onCloseAction() }
@@ -129,7 +131,7 @@ fun DialogCompose(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = "No",
+                                    text = "Từ chối",
                                     color = Color.Black,
                                     style = TextStyle(
                                         fontWeight = FontWeight.Bold
@@ -156,7 +158,7 @@ fun DialogCompose(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = "Agree",
+                                text = "Đồng ý",
                                 color = Color.White,
                                 style = TextStyle(
                                     fontWeight = FontWeight.Bold

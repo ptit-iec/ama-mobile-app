@@ -35,6 +35,18 @@ class MakeupAppState(
     private var _currentTopLevelDestination = MutableStateFlow(TopLevelDestination.Page1)
     val currentTopLevelDestination = _currentTopLevelDestination.asStateFlow()
 
+    private var _isLoading = MutableStateFlow(false)
+    val isLoading = _isLoading.asStateFlow()
+    fun setLoading(isLoading: Boolean){
+        _isLoading.value = isLoading
+    }
+    private var _fadedBackground = MutableStateFlow(false)
+    val fadedBackground = _fadedBackground.asStateFlow()
+
+    fun setFadedBackground(isFaded: Boolean){
+        _fadedBackground.value = isFaded
+    }
+
     fun navigateToTopLevelDestination(destination: TopLevelDestination) {
         if (currentTopLevelDestination.value != destination) {
             _currentTopLevelDestination.value = destination
@@ -42,6 +54,8 @@ class MakeupAppState(
                 popUpTo(navController.graph.id) {
                     inclusive = true
                 }
+                restoreState = true
+                launchSingleTop = true
             }
         }
     }
