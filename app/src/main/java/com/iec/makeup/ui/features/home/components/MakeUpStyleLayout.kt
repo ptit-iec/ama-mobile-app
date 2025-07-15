@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.material3.Card
@@ -12,8 +14,12 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -31,21 +37,26 @@ fun MakeUpStyleLayout(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Card(
-            modifier = Modifier.size(80.dp),
-            shape = RoundedCornerShape(8.dp),
+            modifier = Modifier.size(120.dp),
+            shape = CircleShape,
             elevation = CardDefaults.cardElevation(0.dp),
         ) {
             AsyncImage(
                 model = item.image,
-                contentDescription = null
+                contentDescription = null,
+                contentScale = ContentScale.FillBounds
             )
         }
-        Spacer(modifier = Modifier.size(2.dp))
+        Spacer(modifier = Modifier.size(8.dp))
         Text(
             text = item.title,
             textAlign = TextAlign.Center,
             fontSize = 12.sp,
-            color = ColorDB7093
+            color = Color.Black,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.width(80.dp),
+
         )
     }
 }

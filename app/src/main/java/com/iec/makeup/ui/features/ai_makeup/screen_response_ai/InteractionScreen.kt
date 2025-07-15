@@ -1,5 +1,6 @@
 package com.iec.makeup.ui.features.ai_makeup.screen_response_ai
 
+import android.net.Uri
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -13,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -25,15 +27,55 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
 import com.iec.makeup.R
+import com.iec.makeup.data.remote.api.ChatbotRequest
+import com.iec.makeup.data.remote.dto.FaceAnalysis
+import com.iec.makeup.ui.LocalAppState
 import com.iec.makeup.ui.theme.ColorDB7093
 
 
 @Composable
 fun InteractionScreenStateful(
     navBack: () -> Unit = {},
-    navToEditScreen: () -> Unit = {},
+    navToEditScreen: (String, String) -> Unit = {_,_ ->},
+    chatbotRequest: ChatbotRequest? = null
 ) {
+
+    val viewModel : InteractionVM = hiltViewModel()
+    val state = viewModel.state.collectAsStateWithLifecycle()
+    val effect = viewModel.effect.collectAsStateWithLifecycle(initialValue = null)
+    val appState = LocalAppState.current
+
+
+    appState.setLoading(state.value.isLoading)
+
+
+    LaunchedEffect(Unit) {
+        if(chatbotRequest == null) navBack()
+        else{
+            if(state.value.data.isEmpty()){
+                viewModel.getInitResponse(chatbotRequest)
+            }
+        }
+    }
+    InteractionScreenStateless(
+        navBack = navBack,
+        navToEditScreen = navToEditScreen,
+        state = state.value
+    )
+}
+
+@Composable
+fun InteractionScreenStateless(
+    navBack: () -> Unit = {},
+    navToEditScreen:  (String, String) -> Unit = {_,_ ->},
+    state: InteractionState = InteractionState()
+){
+
+    var isPicked by rememberSaveable { mutableIntStateOf(0) }
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -68,16 +110,28 @@ fun InteractionScreenStateful(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    InteractionScreen()
+                    if(state.data.isNotEmpty()){
+                        InteractionScreen(
+                            data = state.data,
+                            indexPicked = isPicked,
+                            setPicked = { isPicked = it }
+                        )
+                    }
                     Spacer(modifier = Modifier.height(16.dp))
-                    FeatureSelectorRow()
+                    FeatureSelectorRow(
+                        faceAnalysis = state.faceAnalysis
+                    )
                     Spacer(modifier = Modifier.height(16.dp))
                     Button(
                         modifier = Modifier.wrapContentWidth(),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = ColorDB7093
                         ),
-                        onClick = { navToEditScreen() },
+                        onClick = {
+                            if(state.data.isNotEmpty()){
+                                navToEditScreen(state.resultChatID ?: "", Uri.encode(state.data[isPicked]))
+                            }
+                        },
                     ) {
                         Text(
                             modifier = Modifier.wrapContentWidth(),
@@ -98,29 +152,23 @@ fun InteractionScreenStateful(
     }
 }
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun InteractionScreen() {
-    var isFavorite by remember { mutableStateOf(false) }
-    var isPicked by remember { mutableIntStateOf(0) }
-    val listImage = listOf<Int>(
-        R.drawable.chatgpt_image_apr_2__2025__01_14_53_am,
-        R.drawable.pick2,
-        R.drawable.instruction_1_2,
-        R.drawable.pick1_edit,
-        R.drawable.chatgpt_image_apr_2__2025__01_14_53_am,
-        R.drawable.pick1_edit
-    )
+fun InteractionScreen(
+    data: List<String> = listOf("https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80"),
+    indexPicked: Int,
+    setPicked: (Int) -> Unit = {},
+) {
     Column(
         modifier = Modifier
-            .padding(vertical = 18.dp, horizontal = 4.dp)
+            .padding(vertical = 8.dp, horizontal = 4.dp)
             .background(Color.Transparent),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Card(
             modifier = Modifier
-                .aspectRatio(1f)
+                .width(300.dp)
+                .height(320.dp)
                 .padding(
                     horizontal = 32.dp
                 )
@@ -132,13 +180,15 @@ fun InteractionScreen() {
                 ),
             shape = RoundedCornerShape(24.dp),
             colors = CardDefaults.cardColors(
-                containerColor = ColorDB7093,
+                containerColor = Color.White,
             ),
         ) {
-            Image(
-                painter = painterResource(listImage[isPicked]),
+            AsyncImage(
+                model = data[indexPicked],
                 contentDescription = "j",
-                contentScale = ContentScale.FillHeight
+                contentScale = ContentScale.FillHeight,
+                alignment = Alignment.Center,
+                modifier = Modifier.fillMaxSize()
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
@@ -151,7 +201,7 @@ fun InteractionScreen() {
         LazyRow(
             modifier = Modifier.padding(vertical = 8.dp)
         ) {
-            items(listImage.size) {
+            items(data.size) {
                 Box(
                     modifier = Modifier
                         .padding(horizontal = 8.dp)
@@ -162,7 +212,7 @@ fun InteractionScreen() {
                             spotColor = ColorDB7093
                         )
                         .clickable {
-                            isPicked = it
+                            setPicked(it)
                         },
                 ) {
                     Card(
@@ -170,13 +220,13 @@ fun InteractionScreen() {
                         elevation = CardDefaults.cardElevation(
                             defaultElevation = 8.dp
                         ),
-                        border = if (isPicked == it) BorderStroke(
+                        border = if (indexPicked == it) BorderStroke(
                             2.dp,
                             ColorDB7093
                         ) else BorderStroke(0.dp, Color.Transparent),
                     ) {
-                        Image(
-                            painter = painterResource(listImage[it]),
+                        AsyncImage(
+                            model = data[it],
                             contentScale = ContentScale.Crop,
                             contentDescription = "Image",
                         )
@@ -189,35 +239,41 @@ fun InteractionScreen() {
 }
 
 @Composable
-fun FeatureSelectorRow() {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 16.dp), // Add padding around the row
-        horizontalArrangement = Arrangement.SpaceAround, // Distribute items evenly
-        verticalAlignment = Alignment.Top // Align items' tops
-    ) {
-        // Item 1: Oval
-        FeatureItem(
-            painter = painterResource(R.drawable.cream), // Replace with your actual oval face icon painter
-            label = "Oval",
-            iconSize = 48.dp // Adjust size as needed
-        )
+fun FeatureSelectorRow(
+    faceAnalysis: FaceAnalysis? = FaceAnalysis()
+) {
+    if(faceAnalysis == null){
+        Row {
+            Text(
+                text = "Không thể phân tích khuôn mặt, vui lòng thử lại"
+            )
+        }
+    }else{
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 16.dp), // Add padding around the row
+            horizontalArrangement = Arrangement.SpaceAround, // Distribute items evenly
+            verticalAlignment = Alignment.Top // Align items' tops
+        ) {
+            // Item 1: Oval
+            if(faceAnalysis.faceShape != null){
+                FeatureItem(
+                    painter = painterResource(R.drawable.cream), // Replace with your actual oval face icon painter
+                    label = faceAnalysis.faceShape!!,
+                    iconSize = 48.dp // Adjust size as needed
+                )
+            }
 
-        // Item 2: Fair/Light
-        FeatureItem(
-            painter = painterResource(R.drawable.tanning),
-            label = "Facial/Light",
-            iconSize = 48.dp // Adjust size as needed
-        )
-
-        // Item 3: Neutral
-        FeatureItem(
-
-            painter = painterResource(R.drawable.image_removebg_preview__6__1),
-            label = "NeuTral", // Typo as in image, correct to "Neutral" if needed
-            iconSize = 48.dp // Adjust size as needed
-        )
+            // Item 2: Fair/Light
+            if(faceAnalysis.skinTone != null){
+                FeatureItem(
+                    painter = painterResource(R.drawable.tanning),
+                    label = faceAnalysis.skinTone!!,
+                    iconSize = 48.dp // Adjust size as needed
+                )
+            }
+        }
     }
 }
 
@@ -261,5 +317,5 @@ fun FeatureItem(
 @Preview(showBackground = true)
 @Composable
 private fun Preview() {
-    InteractionScreenStateful()
+    InteractionScreenStateless()
 }

@@ -1,9 +1,13 @@
 package com.iec.makeup.ui.navigation
 
+import android.annotation.SuppressLint
+import android.net.Uri
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -13,50 +17,55 @@ import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import com.example.iec.ui.feature.main.message.box_chat_message.ModernChatScreen
 import com.iec.makeup.core.model.ui.MakeUpTemplateLayout
-import com.iec.makeup.core.model.ui.mockMakeUpTemplateLayout
+import com.iec.makeup.data.remote.api.ChatbotRequest
 import com.iec.makeup.ui.MakeupAppState
 import com.iec.makeup.ui.features.ai_makeup.InstructionScreen
 import com.iec.makeup.ui.features.ai_makeup.VirtualScreen
 import com.iec.makeup.ui.features.ai_makeup.screen_chat_with_ai.ScreenChatWithAI
-import com.iec.makeup.ui.features.ai_makeup.screen_response_ai.InteractionScreen
+import com.iec.makeup.ui.features.ai_makeup.screen_chat_with_ai.ScreenChatWithAIVM
+import com.iec.makeup.ui.features.ai_makeup.screen_experts_recommend.ScreenExpertsRcmStateful
+import com.iec.makeup.ui.features.ai_makeup.screen_make_instruct.ScreenMakeUpInstruction
 import com.iec.makeup.ui.features.ai_makeup.screen_response_ai.InteractionScreenStateful
 import com.iec.makeup.ui.features.authentication.login.LoginScreen
 import com.iec.makeup.ui.features.authentication.register.RegisterScreen
 import com.iec.makeup.ui.features.authentication.third_party_auth.GoogleAuthLoadingScreen
 import com.iec.makeup.ui.features.home.HomeScreen
-import com.iec.makeup.ui.features.home.screen_notification.NotificationContent
-import com.iec.makeup.ui.features.home.screen_search.SearchScreen
 import com.iec.makeup.ui.features.home.screen_all_makeup.AllMakeUpScreen
 import com.iec.makeup.ui.features.home.screen_all_makeup_template.ScreenAllMakeupTemplateOfCategoryStateful
-import com.iec.makeup.ui.features.home.screen_detail_template_layout.ScreenDetailTemplateLayout
+import com.iec.makeup.ui.features.booking.BookingScreen
+import com.iec.makeup.ui.features.booking.screen_finish_book.ScreenBookCompleted
 import com.iec.makeup.ui.features.home.screen_detail_template_layout.ScreenDetailTemplateLayoutStateful
-import com.iec.makeup.ui.features.home.screen_makeup_info.ProfileScreen
-import com.iec.makeup.ui.navigation.NavigationArguments.ARG_INITIAL_PROMPT
+import com.iec.makeup.ui.features.home.screen_expert_detail_information.ProfileScreen
+import com.iec.makeup.ui.features.home.screen_notification.NotificationContent
+import com.iec.makeup.ui.features.home.screen_search.SearchScreen
+import com.iec.makeup.ui.features.profiles.UserProfileScreenStateful
+import com.iec.makeup.ui.features.profiles.booking_history.ScreenBookingHistory
+import com.iec.makeup.ui.features.profiles.booking_history.ScreenBookingHistoryStateful
+import com.iec.makeup.ui.navigation.Routes.Companion.ARG_INITIAL_LIST_PROMPT
+import com.iec.makeup.ui.navigation.Routes.Companion.ARG_INITIAL_PROMPT
+import com.iec.makeup.ui.navigation.Routes.Companion.INTERACTION_IMAGE
+import com.iec.makeup.ui.navigation.Routes.Companion.INTERACTION_MAKEUP_TYPE
+import com.iec.makeup.ui.navigation.Routes.Companion.INTERACTION_PROMPT
+import com.iec.makeup.ui.navigation.custom_nav_type.CustomNavType
+import kotlinx.serialization.json.Json
 
 
-object NavigationArguments {
-    const val ARG_INITIAL_PROMPT = "initialPrompt"
-}
-
-const val ARG_INITIAL_LIST_PROMPT = "initialListPrompt"
-
-
+@SuppressLint("UnrememberedGetBackStackEntry")
 @Composable
 fun NavigationGraph(
     navController: NavHostController,
     appState: MakeupAppState
 ) {
     NavHost(navController = navController, startDestination = "auth") {
-
         composable(
-            route = "login-success?code={tempCode}",
+            route = "makeup://login-success?code={tempCode}",
             deepLinks = listOf(
                 navDeepLink {
                     uriPattern = "makeup://login-success?code={tempCode}"
                 }
             ),
             arguments = listOf(
-                navArgument("code") { nullable = true }
+                navArgument("tempCode") { nullable = true }
             )
         ) {
             appState.setVisibleBottomNav(false)
@@ -70,7 +79,8 @@ fun NavigationGraph(
                         restoreState = false
                     }
                 },
-                navBack = { navController.popBackStack() }
+                navBack = { navController.popBackStack() },
+                token = it.arguments?.getString("tempCode")
             )
         }
 
@@ -134,39 +144,50 @@ fun NavigationGraph(
                     navToNotification = {
                         navController.navigate(Routes.MainNotification.createRoute()) {
                             launchSingleTop = true
-                            restoreState = false
+                            restoreState = true
                         }
                     },
                     navToSearch = {
                         navController.navigate(Routes.MainSearch.createRoute()) {
                             launchSingleTop = true
-                            restoreState = false
+                            restoreState = true
                         }
                     },
                     navToAllMakeUpArtist = {
                         navController.navigate(Routes.MainAllMakeUp.createRoute()) {
                             launchSingleTop = true
-                            restoreState = false
+                            restoreState = true
                         }
                     },
                     navToPersonalInfo = { id ->
                         navController.navigate(Routes.MainDetailMakeUp.createRoute(id)) {
                             launchSingleTop = true
-                            restoreState = false
+                            restoreState = true
                         }
                     },
                     navToChatting = {
                         navController.navigate(Routes.MainChatting.createRoute("0")) {
                             launchSingleTop = true
-                            restoreState = false
+                            restoreState = true
                         }
                     },
-                    navToAllTemplate = {
-                        navController.navigate(Routes.MainAllMakeUpTemplate.createRoute(it)) {
+                    navToAllTemplate = { title, it ->
+                        navController.navigate(
+                            Routes.MainAllMakeUpTemplate.createRoute(
+                                title,
+                                it
+                            )
+                        ) {
                             launchSingleTop = true
-                            restoreState = false
+                            restoreState = true
                         }
-                    }
+                    },
+                    navToAI = {
+                        navController.navigate(Routes.Page2.createRoute()) {
+                            launchSingleTop = false
+                            restoreState = true
+                        }
+                    },
                 )
             }
             composable(
@@ -183,7 +204,7 @@ fun NavigationGraph(
                         animationSpec = tween(100)
                     )
                 }) {
-                appState.setVisibleBottomNav(true)
+                appState.setVisibleBottomNav(false)
                 NotificationContent(
                     navBack = { navController.popBackStack() }
                 )
@@ -202,7 +223,7 @@ fun NavigationGraph(
                         animationSpec = tween(100)
                     )
                 }) {
-                appState.setVisibleBottomNav(true)
+                appState.setVisibleBottomNav(false)
                 SearchScreen(
                     navBack = { navController.popBackStack() }
                 )
@@ -221,6 +242,7 @@ fun NavigationGraph(
                         animationSpec = tween(100)
                     )
                 }) {
+                appState.setVisibleBottomNav(false)
                 AllMakeUpScreen(
                     navBack = { navController.popBackStack() },
                     navToDetail = {
@@ -235,10 +257,14 @@ fun NavigationGraph(
                     navArgument(Routes.MAKE_UP_STYLIST_ID) { type = NavType.StringType }
                 )
             ) {
+                appState.setVisibleBottomNav(false)
                 val idMakeUp = it.arguments?.getString(Routes.MAKE_UP_STYLIST_ID) ?: "0"
                 ProfileScreen(
                     id = idMakeUp,
-                    navBack = { navController.popBackStack() }
+                    navBack = { navController.popBackStack() },
+                    navToBookingScreen = { exId ->
+                        navController.navigate(Routes.ScreenBookingExpert.createRoute(exId))
+                    }
                 )
             }
 
@@ -259,34 +285,52 @@ fun NavigationGraph(
             composable(
                 route = Routes.MainAllMakeUpTemplate.route,
                 arguments = listOf(
-                    navArgument(Routes.MAKE_UP_CATEGORY_ID) { type = NavType.StringType }
+                    navArgument(Routes.MAKE_UP_CATEGORY_ID) { type = NavType.StringType },
+                    navArgument(Routes.MAKE_UP_TITLE_ID) { type = NavType.StringType }
                 )
             ) {
-                appState.setVisibleBottomNav(true)
-                val idCategory = it.arguments?.getString(Routes.MAKE_UP_CATEGORY_ID) ?: "0"
+                appState.setVisibleBottomNav(false)
+                val idCategory =
+                    it.arguments?.getString(Routes.MAKE_UP_CATEGORY_ID)?.split(",") ?: emptyList()
                 ScreenAllMakeupTemplateOfCategoryStateful(
                     navBack = {
                         navController.popBackStack()
                     },
                     categoryID = idCategory,
                     navToTemplateDetail = { id ->
-                        navController.navigate(Routes.MailDetailMakeUpTemplate.createRoute(id))
-                    }
+                        navController.navigate(
+                            Routes.MailDetailMakeUpTemplate.createRoute(
+                                Uri.encode(
+                                    id
+                                )
+                            )
+                        )
+                    },
+                    title = it.arguments?.getString(Routes.MAKE_UP_TITLE_ID) ?: "Dự tiệc"
                 )
             }
             composable(
                 route = Routes.MailDetailMakeUpTemplate.route,
                 arguments = listOf(
-                    navArgument(Routes.MAKE_UP_TEMPLATE_ID) { type = NavType.StringType }
+                    navArgument(Routes.MAKE_UP_TEMPLATE_ID) {
+                        type = CustomNavType.MakeUpTemplateLayoutNavType
+                    }
                 )
-            ) {
-                appState.setVisibleBottomNav(true)
-                val idCategory = it.arguments?.getString(Routes.MAKE_UP_TEMPLATE_ID) ?: "0"
+            ) { it ->
+                appState.setVisibleBottomNav(false)
+                val idCategory = it.arguments?.getString(Routes.MAKE_UP_TEMPLATE_ID)
+                val makeUpLayout = idCategory?.let { layout ->
+                    Json.decodeFromString<MakeUpTemplateLayout>(layout)
+                }
                 // Pass id then query by this id, not pass the Item
                 ScreenDetailTemplateLayoutStateful(
-                    item = mockMakeUpTemplateLayout[0],
-                    onApplyTemplate = {
-                        navController.navigate(Routes.Page2.createRoute())
+                    item = makeUpLayout!!,
+                    onApplyTemplate = { item ->
+                        navController.navigate(
+                            Routes.Page2.createRoute(
+                                initPrompt = item.description ?: ""
+                            )
+                        )
                     },
                     onClose = {
                         navController.popBackStack()
@@ -301,25 +345,30 @@ fun NavigationGraph(
             navigation(
                 startDestination = Routes.Page2.createRoute(),
                 route = "ai",
-                arguments = listOf(
-                    navArgument(ARG_INITIAL_PROMPT) { type = NavType.StringType },
-                    navArgument(ARG_INITIAL_LIST_PROMPT) {
-                        type = NavType.StringListType
-                    }
-                )
-            ) {
-                composable(route = Routes.Page2.createRoute()) {
+
+                ) {
+                composable(
+                    route = Routes.Page2.route,
+                    arguments = listOf(
+                        navArgument(ARG_INITIAL_PROMPT) {
+                            type = NavType.StringType
+                            defaultValue = ""
+                        },
+                    )) {
                     appState.setVisibleBottomNav(true)
                     val initialPrompt: String = it.arguments?.getString(ARG_INITIAL_PROMPT) ?: ""
-                    val initialListPrompt: List<String>? =
-                        it.arguments?.getStringArrayList(ARG_INITIAL_LIST_PROMPT)
                     VirtualScreen(
                         initialPrompts = initialPrompt,
-                        randomList = initialListPrompt,
                         navBack = { navController.popBackStack() },
                         navInstruction = { navController.navigate(Routes.InstructionScreen.createRoute()) },
-                        navInteraction = {
-                            navController.navigate(Routes.ScreenInteractionRoutes.route)
+                        navInteraction = { prompt, image, id ->
+                            navController.navigate(
+                                Routes.ScreenInteractionRoutes.createRoute(
+                                    prompt,
+                                    image,
+                                    id
+                                )
+                            )
                         }
                     )
                 }
@@ -337,42 +386,199 @@ fun NavigationGraph(
                     )
                 }
 
-                composable(route = Routes.ScreenInteractionRoutes.route) {
+                composable(
+                    route = Routes.ScreenInteractionRoutes.route,
+                    arguments = listOf(
+                        navArgument(INTERACTION_PROMPT) { type = NavType.StringType },
+                        navArgument(INTERACTION_IMAGE) { type = NavType.StringType },
+                        navArgument(INTERACTION_MAKEUP_TYPE) { type = NavType.StringType }
+                    )
+                ) {
                     appState.setVisibleBottomNav(false)
+                    val prompt = it.arguments?.getString(INTERACTION_PROMPT) ?: ""
+                    val image = Uri.decode(it.arguments?.getString(INTERACTION_IMAGE) ?: "")
+                    val makeupType = it.arguments?.getString(INTERACTION_MAKEUP_TYPE)
+                        ?: "6802056530135d4049a8a6d4"
                     InteractionScreenStateful(
                         navBack = { navController.popBackStack() },
-                        navToEditScreen = {
-                            navController.navigate(Routes.ScreenChatWithAIRoute.createRoute()) {
+                        navToEditScreen = { id, image ->
+                            navController.navigate(
+                                Routes.ScreenChatWithAIRoute.createRoute(
+                                    id,
+                                    image
+                                )
+                            ) {
+                                launchSingleTop = true
+                                restoreState = true
                             }
+                        },
+                        chatbotRequest = ChatbotRequest(
+                            prompt = prompt,
+                            imageRequest = image,
+                            makeupTempId = makeupType
+                        )
+                    )
+                }
+
+                composable(
+                    route = Routes.ScreenChatWithAIRoute.route,
+                    arguments = listOf(
+                        navArgument(Routes.CONVERSATION_ID) { type = NavType.StringType },
+                        navArgument(Routes.IMAGE_INIT_ID) { type = NavType.StringType }
+                    )
+                ) {
+                    appState.setVisibleBottomNav(false)
+                    val id = it.arguments?.getString(Routes.CONVERSATION_ID) ?: ""
+                    val image = Uri.decode(it.arguments?.getString(Routes.IMAGE_INIT_ID) ?: "")
+                    val parentEntry = remember { navController.getBackStackEntry("main") }
+                    val viewModel: ScreenChatWithAIVM = hiltViewModel(parentEntry)
+                    ScreenChatWithAI(
+                        navBack = {
+                            navController.popBackStack()
+
+                                  },
+                        navHome = {
+                            navController.navigate(Routes.Page2.createRoute()) {
+                                popUpTo(Routes.Page2.createRoute()) {
+                                    inclusive = false
+                                }
+                                launchSingleTop = true
+                                restoreState = false
+                            }
+                        },
+                        navToInstruction = { convID ->
+                            navController.navigate(Routes.ScreenMakeUpInstruction.createRoute(convID)) {
+                                restoreState = true
+                                launchSingleTop = true
+                            }
+                        },
+                        navToExpertsRcm = { quesID ->
+                            navController.navigate(
+                                Routes.ScreenExpertsRecommended.createRoute(
+                                    quesID
+                                )
+                            )
+                        },
+                        imageLink = image,
+                        chatBotID = id,
+                        viewModelD = viewModel
+                    )
+                }
+
+                composable(
+                    route = Routes.ScreenMakeUpInstruction.route,
+                    arguments = listOf(
+                        navArgument(Routes.INTERACTION_INSTRUCTION) { type = NavType.StringType }
+                    )
+                ) {
+                    val id = it.arguments?.getString(Routes.INTERACTION_INSTRUCTION) ?: ""
+                    ScreenMakeUpInstruction(
+                        navBack = { navController.popBackStack() },
+                        conversationID = id
+                    )
+                }
+
+                composable(
+                    route = Routes.ScreenExpertsRecommended.route,
+                    arguments = listOf(
+                        navArgument(Routes.QUESTION_ID) { type = NavType.StringType }
+                    )
+                ) {
+                    val id = it.arguments?.getString(Routes.QUESTION_ID) ?: ""
+                    ScreenExpertsRcmStateful(
+                        navBack = { navController.popBackStack() },
+                        questionId = id,
+                        navToDetail = { expertID ->
+                            navController.navigate(Routes.MainDetailMakeUp.createRoute(expertID))
                         }
                     )
                 }
 
-                composable(route = Routes.ScreenChatWithAIRoute.route) {
-                    appState.setVisibleBottomNav(false)
-                    ScreenChatWithAI(
-                        navBack = { navController.popBackStack() }
-                    )
-                }
 
             }
-
-
-            /*
-             - Cart Route
-             */
-            composable(route = Routes.Page3.createRoute()) {
-                appState.setVisibleBottomNav(true)
-                Text("Page 3")
-            }
-
-
             /*
              - Profile Route
              */
-            composable(route = Routes.Page4.createRoute()) {
-                appState.setVisibleBottomNav(true)
-                Text("Page 4")
+            navigation(
+                startDestination = Routes.ScreenUserProfile.route,
+                route = "profile"
+            ) {
+                composable(
+                    route = Routes.ScreenUserProfile.route
+                ) {
+
+                    appState.setVisibleBottomNav(true)
+                    UserProfileScreenStateful(
+                        navToLogin = {
+                            navController.navigate("auth") {
+                                popUpTo("main") {
+                                    inclusive = false
+                                }
+                                launchSingleTop = true
+                            }
+                        },
+                        navToBookingHistory = {
+                            navController.navigate(Routes.ScreenBookingHistory.createRoute())
+                        }
+                    )
+                }
+                composable(
+                    route = Routes.ScreenBookingHistory.route
+                ) {
+                    appState.setVisibleBottomNav(false)
+                    ScreenBookingHistoryStateful(
+                        navBack = {
+                            navController.popBackStack()
+                        }
+                    )
+                }
+            }
+
+            navigation(
+                startDestination = Routes.ScreenBookingExpert.route,
+                route = "main-booking"
+            ) {
+                composable(
+                    route = Routes.ScreenBookingExpert.route
+                ) {
+                    BookingScreen(
+                        navBack = { navController.popBackStack() },
+                        navToComplete = {
+                            navController.navigate("complete-booking") {
+                                popUpTo("main") {
+                                    inclusive = false
+                                }
+                                launchSingleTop = true
+                            }
+                        }
+                    )
+                }
+                composable(
+                    route = "complete-booking",
+                    enterTransition = {
+                        slideIntoContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Up,
+                            animationSpec = tween(100)
+                        )
+                    },
+                    exitTransition = {
+                        slideOutOfContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Down,
+                            animationSpec = tween(100)
+                        )
+                    }
+                ) {
+                    ScreenBookCompleted(
+                        navHome = {
+                            navController.navigate("main") {
+                                popUpTo("main") {
+                                    inclusive = false
+                                }
+                                launchSingleTop = true
+                            }
+                        }
+                    )
+                }
             }
         }
     }

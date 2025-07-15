@@ -5,36 +5,34 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class MakeUpTemplateLayout(
-    val id: String,
-    val image: String,
-    val prompt: String,
-    val isFavorite: Boolean = false,
+    val id: String? = null,
+    val makeupTempCategoryId: ArrayList<String> = arrayListOf(),
+    val title: String? = null,
+    val description: String? = null,
+    val thumbnail: String? = null,
+
 )
 
 val mockMakeUpTemplateLayout = listOf(
     MakeUpTemplateLayout(
-        "1",
-        "https://i.pinimg.com/736x/86/2f/31/862f310c3e879aefcbf50748758e32cc.jpg",
-        "Prompt 1",
-        false
+        id = "1",
+        makeupTempCategoryId = arrayListOf("1"),
+        title = "title",
+        description = "description",
+        thumbnail = "thumbnail",
     ),
     MakeUpTemplateLayout(
-        "2",
-        "https://i.pinimg.com/736x/86/2f/31/862f310c3e879aefcbf50748758e32cc.jpg",
-        "Prompt 2",
-        true
+        id = "2",
+        makeupTempCategoryId = arrayListOf("1"),
+        title = "title",
+        description = "description",
+        thumbnail = "thumbnail",
     ),
     MakeUpTemplateLayout(
-        "3",
-        "https://i.pinimg.com/736x/86/2f/31/862f310c3e879aefcbf50748758e32cc.jpg",
-        "Prompt 3",
-        false
+        id = "3",
+        makeupTempCategoryId = arrayListOf("1"),
+        title = "title",
+        description = "description",
+        thumbnail = "thumbnail",
     ),
-    MakeUpTemplateLayout(
-        "4",
-        "https://i.pinimg.com/736x/86/2f/31/862f310c3e879aefcbf50748758e32cc.jpg",
-        "Prompt 4",
-        true
-    ),
-
-    )
+)

@@ -2,11 +2,13 @@ package com.iec.makeup.core
 
 import androidx.lifecycle.ViewModel
 import com.iec.makeup.ui.MakeupAppState
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.receiveAsFlow
 
 
@@ -20,7 +22,7 @@ abstract class BaseViewModel<State : Reducer.ViewState, Event : Reducer.ViewEven
     val state = _state.asStateFlow()
 
     private val _event: MutableSharedFlow<Event> = MutableSharedFlow()
-    val event = _event.asSharedFlow()
+    val event = _event.asSharedFlow().buffer(5, onBufferOverflow = BufferOverflow.SUSPEND)
 
     private val _effect: Channel<Effect> = Channel(Channel.CONFLATED)
     val effect = _effect.receiveAsFlow()

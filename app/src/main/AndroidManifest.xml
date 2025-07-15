@@ -31,6 +31,7 @@
         android:label="@string/app_name"
         android:name=".MakeUpApplication"
         android:supportsRtl="true"
+
         android:networkSecurityConfig="@xml/network_config"
         android:theme="@style/Theme.MakeupAI"
         tools:targetApi="31">
@@ -48,18 +49,20 @@
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.MakeupAI">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
-
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-
                 <data
                     android:scheme="makeup"
-                    android:host="login-success" />
+                    android:host="login-success"
+                    android:pathPattern=".*"/>
             </intent-filter>
         </activity>
         <meta-data

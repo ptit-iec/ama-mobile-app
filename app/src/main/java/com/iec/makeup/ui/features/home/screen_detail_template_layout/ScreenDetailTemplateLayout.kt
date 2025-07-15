@@ -1,8 +1,12 @@
 package com.iec.makeup.ui.features.home.screen_detail_template_layout
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.*
@@ -16,9 +20,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
+import coil.compose.AsyncImage
 import com.iec.makeup.R
 import com.iec.makeup.core.model.ui.MakeUpTemplateLayout
+import com.iec.makeup.core.model.ui.mockMakeUpTemplateLayout
 import com.iec.makeup.ui.theme.ColorDB7093
+import dev.jeziellago.compose.markdowntext.MarkdownText
 
 
 @Composable
@@ -44,7 +52,9 @@ fun ScreenDetailTemplateLayout(
 
 ) {
     Column(
-        modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp, vertical = 16.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 8.dp, vertical = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
@@ -55,15 +65,15 @@ fun ScreenDetailTemplateLayout(
             // --- Image ---
 
             // --- Heart Icon ---
-            Icon(
-                imageVector = Icons.Outlined.FavoriteBorder, // Use Filled.Favorite if it should be filled
-                contentDescription = "Like",
-                tint = Color(0xFFE91E63), // Pinkish color for the heart
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(12.dp) // Padding from the corner
-                    .size(32.dp) // Size of the icon
-            )
+//            Icon(
+//                imageVector = Icons.Outlined.FavoriteBorder, // Use Filled.Favorite if it should be filled
+//                contentDescription = "Like",
+//                tint = Color(0xFFE91E63), // Pinkish color for the heart
+//                modifier = Modifier
+//                    .align(Alignment.TopEnd)
+//                    .padding(12.dp) // Padding from the corner
+//                    .size(32.dp) // Size of the icon
+//            )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -71,24 +81,32 @@ fun ScreenDetailTemplateLayout(
         Card(
             shape = RoundedCornerShape(12.dp),
             elevation = CardDefaults.cardElevation(4.dp),
-            modifier = Modifier.aspectRatio(1f)
+            modifier = Modifier
+
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.pick1), // <<--- REPLACE with your image resource
+            AsyncImage(
+                model = item.thumbnail,
                 contentDescription = "Profile Image",
                 contentScale = ContentScale.Crop, // Crop to fit bounds
                 modifier = Modifier
-                    .fillMaxSize()
-                    .clip(RoundedCornerShape(12.dp)) // Rounded corners for the image
+                    .width(280.dp)
+                    .height(360.dp),
+
+                )
+        }
+
+        Box(
+        ){
+            MarkdownText(
+                markdown = item.description ?: "",
+                modifier = Modifier
+                    .padding(top = 8.dp, start = 16.dp, end = 16.dp)
+                    .fillMaxWidth()
+                    .heightIn(max = 200.dp)
+                    .verticalScroll( state = rememberScrollState()),
+                style = MaterialTheme.typography.bodyMedium,
             )
         }
-        // --- Text Description ---
-        Text(
-            text = item.prompt,
-            style = MaterialTheme.typography.bodyMedium,
-            textAlign = TextAlign.Center, // Align text to the start
-            modifier = Modifier.fillMaxWidth() // Take full width within the card padding
-        )
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -131,11 +149,6 @@ fun ScreenDetailTemplateLayout(
 @Composable
 private fun Preview() {
     ScreenDetailTemplateLayout(
-        item = MakeUpTemplateLayout(
-            "1",
-            "https://i.pinimg.com/736x/86/2f/31/862f310c3e879aefcbf50748758e32cc.jpg",
-            "Prompt 1",
-            false
-        )
+        item = mockMakeUpTemplateLayout[0]
     )
 }

@@ -6,7 +6,9 @@ import com.iec.makeup.core.BaseViewModel
 import com.iec.makeup.core.DataStoreInterface
 import com.iec.makeup.core.PreferenceKeys
 import com.iec.makeup.core.Reducer
+import com.iec.makeup.core.network.TokenManager
 import com.iec.makeup.core.utils.fromJson
+import com.iec.makeup.data.remote.api.UserEndpoint
 import com.iec.makeup.data.repository.AuthRepository
 import com.iec.makeup.network.APIResult
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,6 +29,7 @@ import javax.inject.Inject
 data class LoginScreenState(
     val isLoading: Boolean = false,
     val isAuthenticated: Boolean = false,
+    val introIndex: Int = IntroScreen.IntroScreenA.ordinal,
     val username: String?,
     val password: String?,
 ) : Reducer.ViewState
@@ -99,7 +102,9 @@ class LoginScreenReducer @Inject constructor() :
 @HiltViewModel
 class LoginScreenVM @Inject constructor(
     private val authRepository: AuthRepository,
-    private val dataStore: DataStoreInterface
+    private val dataStore: DataStoreInterface,
+    private val tokenManager: TokenManager,
+    private val userEndpoint: UserEndpoint
 ) : BaseViewModel<LoginScreenState, LoginScreenEvent, LoginScreenEffect>(
     initialState = LoginScreenState(
         isLoading = false,
@@ -114,31 +119,51 @@ class LoginScreenVM @Inject constructor(
     }
 
     init {
-        combine(
-            dataStore.readKey(PreferenceKeys.USER_NAME),
-            dataStore.readKey(PreferenceKeys.USER_PASSWORD)
-        ) { email, password ->
-            Pair(email, password)
-        }.onEach {
-            sendEvent(LoginScreenEvent.OnUsernameChange(it.first ?: ""))
-            sendEvent(LoginScreenEvent.OnPasswordChange(it.second ?: ""))
-        }.launchIn(
-            viewModelScope + Dispatchers.IO
-        )
+//        combine(
+//            dataStore.readKey(PreferenceKeys.USER_NAME),
+//            dataStore.readKey(PreferenceKeys.USER_PASSWORD)
+//        ) { email, password ->
+//            Pair(email, password)
+//        }.onEach {
+//            sendEvent(LoginScreenEvent.OnUsernameChange(it.first ?: ""))
+//            sendEvent(LoginScreenEvent.OnPasswordChange(it.second ?: ""))
+//        }.launchIn(
+//            viewModelScope + Dispatchers.IO
+//        )
+        val token = tokenManager.getToken()
+        viewModelScope.launch {
+            token.collect {
+                if (!it.isNullOrEmpty()) {
+                    sendEventWithEffect(LoginScreenEvent.OnLoadingDialog(true))
+                    try {
+                        val result = userEndpoint.getUsers()
+                        if (result.isSuccessful) {
+                            if (result.body()?.success == true) {
+                                sendEventWithEffect(LoginScreenEvent.Login)
+                            }
+                        }
+                    } catch (e: Exception) {
+                        sendEventWithEffect(LoginScreenEvent.OnLoadingDialog(false))
+                    }
+                }
+            }
+        }
     }
 
+    fun nextIntro(){
+
+    }
     fun doLogin() {
         coroutineScope.launch(Dispatchers.IO) {
             sendEvent(LoginScreenEvent.OnLoadingDialog(true))
             try {
-                withTimeout(5000) {
+                withTimeout(30000) {
                     val result =
                         authRepository.doLogin(state.value.username!!, state.value.password!!)
                     if (result.isSuccessful) {
                         dataStore.saveKey(PreferenceKeys.USER_NAME, state.value.username!!)
                         dataStore.saveKey(PreferenceKeys.USER_PASSWORD, state.value.password!!)
-                        dataStore.saveKey(
-                            PreferenceKeys.USER_TOKEN,
+                        tokenManager.setToken(
                             result.body()!!.data?.accessToken ?: ""
                         )
                         sendEventWithEffect(LoginScreenEvent.Login)
@@ -154,7 +179,7 @@ class LoginScreenVM @Inject constructor(
                         }
                     }
                 }
-//                delay(2000)
+//                delay(2000    )
 //                sendEventWithEffect(LoginScreenEvent.Login)
             } catch (e: Exception) {
                 errorArrived(e.toString())

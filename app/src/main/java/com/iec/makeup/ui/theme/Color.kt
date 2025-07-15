@@ -6,25 +6,22 @@ import androidx.compose.ui.graphics.Color
  -----------------------------------------------
  Color versions 2
  */
-
-val ColorFFC1CC = Color(0xFFFFC1CC)// Light Pink
+val ColorFF7470 = Color(0xFFFF7470)
+val primaryColorV2 = Color(0xFFFFDCDF)// Light Pink
+val onPrimaryColorV2 = Color(0xFFFF5969)
 val ColorFFE4E1 = Color(0xFFFFE4E1) // Misty Rose
 val ColorFFF0F5 = Color(0xFFFFF0F5) // Lavender Blush
+val ColorFAF9F9 = Color(0xFFFAF9F9) // Light Gray
 val ColorFF69B4 = Color(0xFFFF69B4) // Hot Pink
-val ColorDB7093 = Color(0xFFDB7093) // Pale Violet Red
+val ColorDB7093 = Color(0xFFFF7470) // Pale Violet Red
 val Color33FF69B4 = Color(0x33FF69B4)
 /*
  -----------------------------------------------
  Color versions 1
  */
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
-
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+val primaryColor = Color(0xFFFF7470) // Pale Violet Red
+val onPrimaryColor = Color(0xFFFE4141)
 
 val LightPrimary = Color(0xFFFF87B2)
 val LightOnPrimary = Color(0xFFFFFFFF)

@@ -13,3 +13,22 @@ data class Message(
 enum class HEADER(val type: String) {
     MESSAGE("message"), FILE("file"), IMAGE("image"), VIDEO("video"), AUDIO("audio")
 }
+
+
+val mockList = listOf(
+    Message(isFromUser = true, message = "Hello", timestamp = 0),
+    Message(isFromUser = false, message = "Hello", timestamp = 0),
+    Message(isFromUser = true, message = "Hello", timestamp = 0),
+    Message(isFromUser = false, message = "Hello", timestamp = 0),
+    Message(isFromUser = true, message = "Hello", timestamp = 0),
+    Message(isFromUser = false, message = "Hello", timestamp = 0),
+    Message(isFromUser = true, message = "Hello", timestamp = 0),
+    Message(isFromUser = false, message = "Hello", timestamp = 0),Message(isFromUser = true, message = "Hello", timestamp = 0),
+    Message(isFromUser = false, message = "Hello", timestamp = 0),
+    Message(isFromUser = true, message = "Hello", timestamp = 0),
+    Message(isFromUser = false, message = "Hello", timestamp = 0),
+    Message(isFromUser = true, message = "Hello", timestamp = 0),
+    Message(isFromUser = false, message = "Hello", timestamp = 0),
+    Message(isFromUser = true, message = "Hello", timestamp = 0),
+    Message(isFromUser = false, message = "Hello", timestamp = 0),
+)

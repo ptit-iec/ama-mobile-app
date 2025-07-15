@@ -1,18 +1,24 @@
 package com.iec.makeup.data.repository
 
 import com.iec.makeup.data.remote.api.AuthEndpoint
+import com.iec.makeup.data.remote.api.GoogleLoginRequest
 import com.iec.makeup.data.remote.api.LoginRequest
 import com.iec.makeup.data.remote.dto.LoginDTO
 import com.iec.makeup.network.APIResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import org.json.JSONObject
 import retrofit2.Response
 import javax.inject.Inject
 
 interface AuthRepository {
     suspend fun doLogin(username: String, password: String): Response<APIResult<LoginDTO?>>
     suspend fun doRegistration(username: String, password: String)
+    suspend fun doGoogleLogin(code: String): Response<APIResult<LoginDTO?>>
 }
 
 class AuthRepositoryImpl @Inject constructor(
@@ -32,8 +38,15 @@ class AuthRepositoryImpl @Inject constructor(
         }
     }
 
+
     override suspend fun doRegistration(username: String, password: String) {
 
+    }
+
+    override suspend fun doGoogleLogin(code: String): Response<APIResult<LoginDTO?>> {
+        return withContext(Dispatchers.IO) {
+            authRemote.loginWithGoogle(GoogleLoginRequest(code))
+        }
     }
 
 }

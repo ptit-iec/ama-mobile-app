@@ -1,5 +1,6 @@
 package com.iec.makeup.ui.features.home.screen_all_makeup.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -14,7 +15,7 @@ import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
-import androidx.compose.material.icons.filled.FilterAlt
+import androidx.compose.material.icons.outlined.FilterList
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -24,11 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.iec.makeup.core.ui.IECTextField
-import com.iec.makeup.ui.theme.Color33FF69B4
 import com.iec.makeup.ui.theme.ColorDB7093
-import com.iec.makeup.ui.theme.ColorFFE4E1
-import com.iec.makeup.ui.theme.ColorFFF0F5
-import com.iec.makeup.ui.theme.DarkBackground
 
 
 @Composable
@@ -42,15 +39,15 @@ fun SearchBar(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(color = ColorFFF0F5)
+            .background(color = Color.Transparent)
             .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.Start
     ) {
         Icon(
             imageVector = Icons.Default.ArrowBackIosNew,
             contentDescription = "Back",
-            tint = DarkBackground,
+            tint = Color.White,
             modifier = Modifier
                 .padding(8.dp)
                 .size(22.dp)
@@ -61,9 +58,10 @@ fun SearchBar(
         Card(
             modifier = Modifier
                 .height(40.dp)
-                .width(320.dp),
+                .padding(end = 12.dp),
             shape = RoundedCornerShape(8.dp),
-            backgroundColor = Color.White
+            backgroundColor = Color.White,
+            border = BorderStroke(1.dp, ColorDB7093)
         ) {
             IECTextField(
                 placeholder = "Search ...",
@@ -74,22 +72,10 @@ fun SearchBar(
                 }
             )
         }
-        Icon(
-            imageVector = Icons.Default.FilterAlt,
-            contentDescription = "Filter",
-            tint = DarkBackground,
-            modifier = Modifier
-                .padding(8.dp)
-                .size(22.dp)
-                .clickable {
-                    onFilterClick()
-                },
-
-            )
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
+@Preview(showBackground = true)
 @Composable
 private fun SearchBarPreview() {
     SearchBar()

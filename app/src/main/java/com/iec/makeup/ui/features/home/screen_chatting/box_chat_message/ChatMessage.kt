@@ -1,8 +1,10 @@
 package com.iec.makeup.ui.features.home.screen_chatting.box_chat_message
 
 import android.util.Log
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -10,12 +12,15 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
@@ -46,14 +51,21 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import coil.compose.SubcomposeAsyncImage
+import coil.request.ImageRequest
 import com.example.iec.ui.feature.main.message.convertTimeStamp
 import com.iec.makeup.R
+import com.iec.makeup.core.model.HEADER
 import com.iec.makeup.core.model.Message
 import com.iec.makeup.ui.theme.ColorDB7093
 import com.iec.makeup.ui.theme.ColorFFE4E1
@@ -110,7 +122,7 @@ fun MessageInput(
 ) {
     Row(
         modifier = Modifier
-            .padding(horizontal = 8.dp, vertical = 8.dp)
+            .padding(vertical = 8.dp)
             .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
 
@@ -120,8 +132,9 @@ fun MessageInput(
         ) {
             Image(
                 modifier = Modifier.size(24.dp),
-                painter = painterResource(R.drawable.ai_technology),
-                contentDescription = ""
+                painter = painterResource(R.drawable.ai),
+                contentDescription = "",
+                colorFilter = ColorFilter.tint(ColorDB7093)
             )
         }
         TextField(
@@ -137,7 +150,7 @@ fun MessageInput(
             },
             colors = TextFieldDefaults.colors().copy(
                 focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent
+                unfocusedIndicatorColor = Color.Transparent,
             ),
             shape = RoundedCornerShape(18.dp),
             maxLines = Int.MAX_VALUE
@@ -164,7 +177,8 @@ fun MessageInput(
 fun MessageBubble(
     showAvatar: Boolean,
     message: Message,
-    avatar: Int = R.drawable.account_circle_24dp_df9d9b_fill1_wght400_grad0_opsz24
+    avatar: Int = R.drawable.account_circle_24dp_df9d9b_fill1_wght400_grad0_opsz24,
+    imageView: (String) -> Unit = {},
 ) {
     var onShowTimeStamp by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
@@ -178,17 +192,6 @@ fun MessageBubble(
         Row(
             verticalAlignment = Alignment.Bottom
         ) {
-//            if (!message.isFromUser) {
-//                Image(
-//                    modifier = Modifier
-//                        .padding(end = 6.dp)
-//                        .alpha(if (showAvatar) 1f else 0f)
-//                        .background(color = Color.Transparent, shape = CircleShape)
-//                        .size(30.dp),
-//                    painter = painterResource(avatar),
-//                    contentDescription = "Profile Picture",
-//                )
-//            }
             Surface(
                 modifier = Modifier,
                 shape = RoundedCornerShape(
@@ -197,35 +200,77 @@ fun MessageBubble(
                     bottomStart = if (message.isFromUser) 20.dp else 4.dp,
                     bottomEnd = if (message.isFromUser) 4.dp else 20.dp
                 ),
-                color = ColorDB7093
+                color = if (message.isFromUser) Color(0xFFFFBDBD) else Color.Transparent,
+                border = if (!message.isFromUser) BorderStroke(1.dp, ColorDB7093) else null
             ) {
 
-                Column(
-                    modifier = Modifier
-                        .padding(12.dp)
-                        .clickable(
-                            interactionSource,
-                            indication = null
-                        ) {
-                            onShowTimeStamp = !onShowTimeStamp
-                        }
+                if(message.header == HEADER.MESSAGE){
+                    Column(
+                        modifier = Modifier
+                            .padding(12.dp)
+                            .clickable(
+                                interactionSource,
+                                indication = null
+                            ) {
+                                onShowTimeStamp = !onShowTimeStamp
+                            }
 
-                ) {
-                    Text(
-                        modifier = Modifier.wrapContentWidth(),
-                        text = message.message,
-                        fontSize = 12.sp,
-                        color = ColorFFE4E1
-
-                    )
-                    if (onShowTimeStamp) {
+                    ) {
                         Text(
-                            text = convertTimeStamp(System.currentTimeMillis() - message.timestamp),
-                            fontSize = 10.sp,
-                            color = if (message.isFromUser)
-                                MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
-                            else
-                                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                            modifier = Modifier.wrapContentWidth(),
+                            text = message.message,
+                            fontSize = 12.sp,
+                            color = Color.Black
+                        )
+                        if (onShowTimeStamp) {
+                            Text(
+                                text = convertTimeStamp(System.currentTimeMillis() - message.timestamp),
+                                fontSize = 10.sp,
+                                color = Color.DarkGray
+                            )
+                        }
+                    }
+                }
+                else if(message.header == HEADER.IMAGE){
+                    val targetWidth = 200.dp
+                    Box(
+                        modifier = Modifier.clickable{
+                            imageView(message.message)
+                        }
+                    ){
+                        SubcomposeAsyncImage(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(message.message)
+                                .crossfade(true)
+                                .build(),
+                            contentDescription = null,
+                            loading = {
+                                // Optional: Show a placeholder or loading indicator
+                                Box(modifier = Modifier.size(200.dp)) {
+                                    // e.g., CircularProgressIndicator()
+                                }
+                            },
+                            success = { state ->
+                                val painter = state.painter
+                                val intrinsicSize = painter.intrinsicSize
+                                val aspectRatio = if (intrinsicSize.width > 0 && intrinsicSize.height > 0) {
+                                    intrinsicSize.height / intrinsicSize.width
+                                } else {
+                                    1f // fallback to square
+                                }
+
+                                Image(
+                                    painter = painter,
+                                    contentDescription = null,
+                                    contentScale = ContentScale.Fit,
+                                    modifier = Modifier
+                                        .width(targetWidth)
+                                        .height(targetWidth * aspectRatio)
+                                )
+                            },
+                            error = {
+                                // Optional: Handle error state
+                            }
                         )
                     }
                 }
