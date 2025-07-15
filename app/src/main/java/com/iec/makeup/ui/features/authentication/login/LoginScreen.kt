@@ -1,12 +1,7 @@
 package com.iec.makeup.ui.features.authentication.login
 
-import android.graphics.Paint.Align
 import androidx.browser.customtabs.CustomTabsIntent
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -19,10 +14,13 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -30,11 +28,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.RemoveRedEye
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
@@ -43,23 +38,21 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -74,8 +67,8 @@ import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.google.accompanist.pager.HorizontalPagerIndicator
 import com.iec.makeup.R
-import com.iec.makeup.core.ui.AtomicLoadingDialog
 import com.iec.makeup.core.ui.DialogCompose
 import com.iec.makeup.core.utils.Constants.BASE_URL
 import com.iec.makeup.core.utils.validatesEmailPattern
@@ -83,11 +76,10 @@ import com.iec.makeup.ui.LocalAppState
 import com.iec.makeup.ui.theme.Color33FF69B4
 import com.iec.makeup.ui.theme.ColorDB7093
 import com.iec.makeup.ui.theme.ColorFF69B4
-import com.iec.makeup.ui.theme.ColorFFC1CC
 import com.iec.makeup.ui.theme.ColorFFE4E1
 import com.iec.makeup.ui.theme.ColorFFF0F5
-import qrcode.color.Colors
-import javax.inject.Inject
+import com.iec.makeup.ui.theme.primaryColorV2
+import kotlinx.coroutines.launch
 
 
 const val signInGoogleURL = "${BASE_URL}auth/google"
@@ -122,13 +114,6 @@ fun LoginScreen(
             .fillMaxSize()
     ) {
         LoginScreenWithGoogle(
-            state = screenState.value,
-            doLogin = { viewModel.doLogin() },
-            inputUserName = { viewModel.inputUsername(it) },
-            inputPassword = { viewModel.inputPassword(it) },
-            navToRegister = navToRegister,
-            navToHome = navToHome,
-            showError = { error -> viewModel.errorArrived(error) },
             openGoogleSignIn = openBrowser
         )
     }
@@ -144,292 +129,288 @@ fun LoginScreen(
 
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun LoginScreenStateful(
-    state: LoginScreenState = LoginScreenState(false, false, null, null),
-    doLogin: () -> Unit = {},
-    inputUserName: (String) -> Unit = {},
-    inputPassword: (String) -> Unit = {},
-    showError: (String) -> Unit = {},
-    navToRegister: () -> Unit = {},
-    navToHome: () -> Unit = {},
-    openGoogleSignIn: () -> Unit = {}
-) {
-    var isPasswordVisible by remember { mutableStateOf(true) }
-    var isEmailError by remember { mutableStateOf<String?>(null) }
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        ColorFFC1CC, // Light Pink
-                        ColorFFE4E1, // Misty Rose
-                        ColorFFF0F5 // Lavender Blush
-                    )
-                )
-            )
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 32.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // App Logo/Title
-            Text(
-                text = "GlamAura",
-                style = MaterialTheme.typography.h3.copy(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 40.sp
-                ),
-                color = ColorFF69B4, // Hot Pink
-                modifier = Modifier.padding(bottom = 32.dp)
-            )
-
-            // Welcome Text
-            Text(
-                text = "Login to Your Beauty Journey",
-                style = MaterialTheme.typography.subtitle1,
-                color = ColorDB7093, // Pale Violet Red
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-
-            OutlinedTextField(
-                value = state.username ?: "",
-                onValueChange = {
-                    isEmailError = null
-                    inputUserName(it)
-                },
-                label = { Text("Email") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp),
-                colors = TextFieldDefaults.colors(
-                    focusedTextColor = ColorFF69B4,
-                    unfocusedTextColor = Color.Black,
-                    focusedContainerColor = Color.Transparent,
-
-                    ),
-                shape = RoundedCornerShape(12.dp),
-                singleLine = true,
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.Email,
-                        contentDescription = "Email Icon",
-                        tint = ColorFF69B4
-                    )
-                },
-
-                )
-            if (isEmailError != null) {
-                Text(
-                    text = isEmailError ?: "",
-                    color = Color.Red,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-            }
-            // Password Field
-            OutlinedTextField(
-                value = state.password ?: "",
-                onValueChange = {
-                    inputPassword(it)
-                },
-                label = { Text("Password") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp),
-                visualTransformation = if (isPasswordVisible) PasswordVisualTransformation() else VisualTransformation.None, // Show or hide password based on the value of isPasswordVisible=,
-                colors = TextFieldDefaults.colors(
-                    focusedTextColor = ColorFF69B4,
-                    unfocusedTextColor = Color.Black,
-                    focusedContainerColor = Color.Transparent,
-                ), singleLine = true,
-                shape = RoundedCornerShape(12.dp),
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.Lock,
-                        contentDescription = "Password Icon",
-                        tint = ColorFF69B4
-                    )
-                },
-                trailingIcon = {
-                    if (isPasswordVisible) {
-                        Icon(
-                            imageVector = Icons.Filled.VisibilityOff,
-                            contentDescription = "Hide Password",
-                            modifier = Modifier.clickable {
-                                isPasswordVisible = !isPasswordVisible
-                            }
-                        )
-                    } else {
-                        Icon(
-                            imageVector = Icons.Default.Visibility,
-                            contentDescription = "Show Password",
-                            modifier = Modifier.clickable {
-                                isPasswordVisible = !isPasswordVisible
-                            }
-                        )
-                    }
-                }
-            )
-
-            // Login Button
-            Button(
-                onClick = {
-                    if (!state.username.isNullOrEmpty() && state.username.validatesEmailPattern()) {
-                        doLogin()
-                    } else if (state.username.isNullOrEmpty()) {
-                        isEmailError = "Email is required"
-                    } else {
-                        isEmailError = "Invalid email "
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp)
-                    .padding(top = 16.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = ColorFF69B4
-                )
-            ) {
-                Text(
-                    text = "Login",
-                    color = Color.White,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
-            // Forgot Password
-            Text(
-                text = "Forgot Password?",
-                color = Color.Gray,
-                modifier = Modifier
-                    .padding(top = 16.dp)
-                    .clickable {
-                        showError("You are not able to reset your password")
-                    }
-            )
-
-            // Sign Up Text
-            Row(
-                modifier = Modifier.padding(top = 16.dp),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = "New to GlowAura? ",
-                    color = ColorFF69B4
-                )
-                Text(
-                    text = "Sign Up",
-                    color = ColorFF69B4,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.clickable {
-                        navToRegister()
-                    }
-                )
-            }
-
-            Row(
-                modifier = Modifier
-                    .padding(top = 32.dp)
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Divider(
-                    modifier = Modifier.width(100.dp)
-                )
-                Text(
-                    text = "or continue with",
-                    modifier = Modifier.padding(horizontal = 8.dp),
-                    fontSize = 14.sp,
-                    color = Color.DarkGray
-                )
-                Divider(
-                    modifier = Modifier.width(100.dp)
-                )
+//@OptIn(ExperimentalMaterial3Api::class)
+//@Composable
+//fun LoginScreenStateful(
+//    state: LoginScreenState = LoginScreenState(false, false, null, null),
+//    doLogin: () -> Unit = {},
+//    inputUserName: (String) -> Unit = {},
+//    inputPassword: (String) -> Unit = {},
+//    showError: (String) -> Unit = {},
+//    navToRegister: () -> Unit = {},
+//    navToHome: () -> Unit = {},
+//    openGoogleSignIn: () -> Unit = {}
+//) {
+//    var isPasswordVisible by remember { mutableStateOf(true) }
+//    var isEmailError by remember { mutableStateOf<String?>(null) }
+//    Box(
+//        modifier = Modifier
+//            .fillMaxSize()
+//            .background(
+//                brush = Brush.verticalGradient(
+//                    colors = listOf(
+//                        primaryColorV2, // Light Pink
+//                        ColorFFE4E1, // Misty Rose
+//                        ColorFFF0F5 // Lavender Blush
+//                    )
+//                )
+//            )
+//    ) {
+//        Column(
+//            modifier = Modifier
+//                .fillMaxSize()
+//                .padding(horizontal = 32.dp),
+//            verticalArrangement = Arrangement.Center,
+//            horizontalAlignment = Alignment.CenterHorizontally
+//        ) {
+//            // App Logo/Title
+//            Text(
+//                text = "GlamAura",
+//                style = MaterialTheme.typography.h3.copy(
+//                    fontWeight = FontWeight.Bold,
+//                    fontSize = 40.sp
+//                ),
+//                color = ColorFF69B4, // Hot Pink
+//                modifier = Modifier.padding(bottom = 32.dp)
+//            )
 //
-            }
-            Spacer(Modifier.height(16.dp))
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp, horizontal = 12.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color.White
-                )
-            ) {
-                Box(
-                    modifier = Modifier
-                        .clickable {
-                            openGoogleSignIn()
-                        }
-                ) {
-                    Image(
-                        painter = painterResource(R.drawable.google),
-                        contentDescription = "Google",
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .size(24.dp)
-                    )
-                    Text(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .align(Alignment.Center),
-                        text = "Đăng nhập với Google",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
-        }
-
-        // Decorative Element
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(16.dp)
-                .size(100.dp)
-                .background(
-                    color = Color33FF69B4,
-                    shape = CircleShape
-                )
-        )
-
-
-    }
-}
+//            // Welcome Text
+//            Text(
+//                text = "Login to Your Beauty Journey",
+//                style = MaterialTheme.typography.subtitle1,
+//                color = ColorDB7093, // Pale Violet Red
+//                modifier = Modifier.padding(bottom = 16.dp)
+//            )
+//
+//            OutlinedTextField(
+//                value = state.username ?: "",
+//                onValueChange = {
+//                    isEmailError = null
+//                    inputUserName(it)
+//                },
+//                label = { Text("Email") },
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .padding(bottom = 8.dp),
+//                colors = TextFieldDefaults.colors(
+//                    focusedTextColor = ColorFF69B4,
+//                    unfocusedTextColor = Color.Black,
+//                    focusedContainerColor = Color.Transparent,
+//
+//                    ),
+//                shape = RoundedCornerShape(12.dp),
+//                singleLine = true,
+//                leadingIcon = {
+//                    Icon(
+//                        imageVector = Icons.Default.Email,
+//                        contentDescription = "Email Icon",
+//                        tint = ColorFF69B4
+//                    )
+//                },
+//
+//                )
+//            if (isEmailError != null) {
+//                Text(
+//                    text = isEmailError ?: "",
+//                    color = Color.Red,
+//                    modifier = Modifier.padding(bottom = 8.dp)
+//                )
+//            }
+//            // Password Field
+//            OutlinedTextField(
+//                value = state.password ?: "",
+//                onValueChange = {
+//                    inputPassword(it)
+//                },
+//                label = { Text("Password") },
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .padding(bottom = 8.dp),
+//                visualTransformation = if (isPasswordVisible) PasswordVisualTransformation() else VisualTransformation.None, // Show or hide password based on the value of isPasswordVisible=,
+//                colors = TextFieldDefaults.colors(
+//                    focusedTextColor = ColorFF69B4,
+//                    unfocusedTextColor = Color.Black,
+//                    focusedContainerColor = Color.Transparent,
+//                ), singleLine = true,
+//                shape = RoundedCornerShape(12.dp),
+//                leadingIcon = {
+//                    Icon(
+//                        imageVector = Icons.Default.Lock,
+//                        contentDescription = "Password Icon",
+//                        tint = ColorFF69B4
+//                    )
+//                },
+//                trailingIcon = {
+//                    if (isPasswordVisible) {
+//                        Icon(
+//                            imageVector = Icons.Filled.VisibilityOff,
+//                            contentDescription = "Hide Password",
+//                            modifier = Modifier.clickable {
+//                                isPasswordVisible = !isPasswordVisible
+//                            }
+//                        )
+//                    } else {
+//                        Icon(
+//                            imageVector = Icons.Default.Visibility,
+//                            contentDescription = "Show Password",
+//                            modifier = Modifier.clickable {
+//                                isPasswordVisible = !isPasswordVisible
+//                            }
+//                        )
+//                    }
+//                }
+//            )
+//
+//            // Login Button
+//            Button(
+//                onClick = {
+//                    if (!state.username.isNullOrEmpty() && state.username.validatesEmailPattern()) {
+//                        doLogin()
+//                    } else if (state.username.isNullOrEmpty()) {
+//                        isEmailError = "Email is required"
+//                    } else {
+//                        isEmailError = "Invalid email "
+//                    }
+//                },
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .height(50.dp)
+//                    .padding(top = 16.dp),
+//                shape = RoundedCornerShape(12.dp),
+//                colors = ButtonDefaults.buttonColors(
+//                    containerColor = ColorFF69B4
+//                )
+//            ) {
+//                Text(
+//                    text = "Login",
+//                    color = Color.White,
+//                    fontSize = 16.sp,
+//                    fontWeight = FontWeight.Bold
+//                )
+//            }
+//
+//            // Forgot Password
+//            Text(
+//                text = "Forgot Password?",
+//                color = Color.Gray,
+//                modifier = Modifier
+//                    .padding(top = 16.dp)
+//                    .clickable {
+//                        showError("You are not able to reset your password")
+//                    }
+//            )
+//
+//            // Sign Up Text
+//            Row(
+//                modifier = Modifier.padding(top = 16.dp),
+//                horizontalArrangement = Arrangement.Center
+//            ) {
+//                Text(
+//                    text = "New to GlowAura? ",
+//                    color = ColorFF69B4
+//                )
+//                Text(
+//                    text = "Sign Up",
+//                    color = ColorFF69B4,
+//                    fontWeight = FontWeight.Bold,
+//                    modifier = Modifier.clickable {
+//                        navToRegister()
+//                    }
+//                )
+//            }
+//
+//            Row(
+//                modifier = Modifier
+//                    .padding(top = 32.dp)
+//                    .fillMaxWidth(),
+//                horizontalArrangement = Arrangement.Center,
+//                verticalAlignment = Alignment.CenterVertically
+//            ) {
+//                Divider(
+//                    modifier = Modifier.width(100.dp)
+//                )
+//                Text(
+//                    text = "or continue with",
+//                    modifier = Modifier.padding(horizontal = 8.dp),
+//                    fontSize = 14.sp,
+//                    color = Color.DarkGray
+//                )
+//                Divider(
+//                    modifier = Modifier.width(100.dp)
+//                )
+////
+//            }
+//            Spacer(Modifier.height(16.dp))
+//            Card(
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .padding(vertical = 4.dp, horizontal = 12.dp),
+//                shape = RoundedCornerShape(12.dp),
+//                colors = CardDefaults.cardColors(
+//                    containerColor = Color.White
+//                )
+//            ) {
+//                Box(
+//                    modifier = Modifier
+//                        .clickable {
+//                            openGoogleSignIn()
+//                        }
+//                ) {
+//                    Image(
+//                        painter = painterResource(R.drawable.google),
+//                        contentDescription = "Google",
+//                        modifier = Modifier
+//                            .padding(8.dp)
+//                            .size(24.dp)
+//                    )
+//                    Text(
+//                        modifier = Modifier
+//                            .fillMaxWidth()
+//                            .align(Alignment.Center),
+//                        text = "Đăng nhập với Google",
+//                        fontSize = 16.sp,
+//                        fontWeight = FontWeight.Bold,
+//                        textAlign = TextAlign.Center
+//                    )
+//                }
+//            }
+//        }
+//
+//        // Decorative Element
+//        Box(
+//            modifier = Modifier
+//                .align(Alignment.BottomEnd)
+//                .padding(16.dp)
+//                .size(100.dp)
+//                .background(
+//                    color = Color33FF69B4,
+//                    shape = CircleShape
+//                )
+//        )
+//
+//
+//    }
+//}
 
 
 // Version 1 accept only account verify through google.
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreenWithGoogle(
-    state: LoginScreenState = LoginScreenState(false, false, null, null),
-    doLogin: () -> Unit = {},
-    inputUserName: (String) -> Unit = {},
-    inputPassword: (String) -> Unit = {},
-    showError: (String) -> Unit = {},
-    navToRegister: () -> Unit = {},
-    navToHome: () -> Unit = {},
     openGoogleSignIn: () -> Unit = {}
 ) {
+    val pageState = rememberPagerState(0) {
+        IntroScreen.entries.size
+    }
+    val scope = rememberCoroutineScope()
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        Color(0xFFFF7470), // Light Pink
-                        ColorFFE4E1, // Misty Rose
-                        ColorFFF0F5 // Lavender Blush
+                        Color(0xFFFFDCDF), // Light Pink
+                        Color.White // Lavender Blush
                     )
                 )
             ),
@@ -438,7 +419,7 @@ fun LoginScreenWithGoogle(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 32.dp, vertical = 16.dp)
+                .padding(horizontal = 16.dp, vertical = 16.dp)
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
@@ -448,135 +429,115 @@ fun LoginScreenWithGoogle(
                     .fillMaxSize()
                     .padding(16.dp),
             ) {
-                // Header
-                Text(
-                    text = "AI MAKEUP",
-                    color = Color.White,
-                    fontSize = 30.sp,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
+                HorizontalPager(
+                    state = pageState,
                     modifier = Modifier
+                        .heightIn(500.dp)
                         .fillMaxWidth()
-                        .padding(top = 16.dp)
-                )
-
-                Text(
-                    text = "Biến bạn trở thành phiên bản xinh đẹp nhất",
-                    color = Color.White,
-                    fontSize = 16.sp,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(bottom = 24.dp)
-                )
-
-                // Navigation items in a row
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    // Instructions column
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
+                ) { page ->
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(color = Color.Transparent),
+                        contentAlignment = Alignment.Center,
                     ) {
-                        Image(
-                            painter = painterResource(R.drawable.manual),
-                            contentDescription = "Instructions",
-                            modifier = Modifier.size(40.dp),
-                        )
-                        Text(
-                            text = stringResource(R.string.instructions),
-                            color = Color.White,
-                            fontSize = 16.sp,
-                            overflow = TextOverflow.Visible,
-                            modifier = Modifier.width(100.dp),
-                            textAlign = TextAlign.Center
-                        )
-                    }
+                        when (page) {
+                            0 -> {
+                                IntroScreen(
+                                    introScreen = IntroScreen.IntroScreenA
+                                )
+                            }
 
-                    // Calendar column
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Image(
-                            painter = painterResource(R.drawable.event__1_),
-                            contentDescription = "Instructions",
-                            modifier = Modifier.size(40.dp)
-                        )
-                        Text(
-                            text = stringResource(R.string.booking),
-                            color = Color.White,
-                            fontSize = 16.sp,
-                            overflow = TextOverflow.Visible,
-                            modifier = Modifier.width(100.dp),
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.height(16.dp))
+                            1 -> {
+                                IntroScreen(
+                                    introScreen = IntroScreen.IntroScreenB
+                                )
+                            }
 
-                Image(
-                    painter = painterResource(R.drawable.image_86),
-                    contentDescription = "Bad design Fuk",
-                    modifier = Modifier.size(240.dp).align(Alignment.CenterHorizontally)
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-// Navigation items in a row
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    // Instructions column
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Image(
-                            painter = painterResource(R.drawable.idea),
-                            contentDescription = "Instructions",
-                            modifier = Modifier.size(40.dp)
-                        )
-                        Text(
-                            text = stringResource(R.string.recommend_makeup),
-                            color = ColorDB7093,
-                            fontSize = 16.sp,
-                            overflow = TextOverflow.Visible,
-                            modifier = Modifier.width(100.dp),
-                            textAlign = TextAlign.Center
-                        )
-                    }
-
-                    // Calendar column
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Image(
-                            painter = painterResource(R.drawable.text_message),
-                            contentDescription = "Instructions",
-                            modifier = Modifier.size(40.dp)
-                        )
-                        Text(
-                            text = stringResource(R.string.chat_with_ai),
-                            color = ColorDB7093,
-                            fontSize = 16.sp,
-                            overflow = TextOverflow.Visible,
-                            modifier = Modifier.width(100.dp),
-                            textAlign = TextAlign.Center
-                        )
+                            2 -> {
+                                IntroScreen(
+                                    introScreen = IntroScreen.IntroScreenC
+                                )
+                            }
+                            3 -> {
+                                IntroScreen(
+                                    introScreen = IntroScreen.IntroScreenD
+                                )
+                            }
+                        }
                     }
                 }
 
+
+                Spacer(modifier = Modifier.height(16.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ){
+                    Row(
+                        Modifier
+                            .wrapContentHeight()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        repeat(pageState.pageCount) { index ->
+                            val isSelected = pageState.currentPage == index
+                            Box(
+                                modifier = Modifier
+                                    .size(12.dp)
+                                    .background(
+                                        color = if (isSelected) {
+                                            Color(0xFFFF5969)
+                                        } else {
+                                            Color.LightGray
+                                        },
+                                        shape = if (isSelected) {
+                                            RoundedCornerShape(12.dp)
+                                        } else {
+                                            CircleShape
+                                        }
+                                    )
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                        }
+                    }
+                    if (pageState.currentPage < pageState.pageCount - 1) {
+                        Text(
+                            text = "Next",
+                            color = Color(0xFFFF5969),
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .clickable {
+                                if (pageState.currentPage < pageState.pageCount - 1) {
+                                    scope.launch {
+                                        pageState.scrollToPage(pageState.currentPage + 1)
+                                    }
+                                }
+                            }
+                        )
+                    }
+                }
                 Spacer(modifier = Modifier.height(16.dp))
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 4.dp, horizontal = 12.dp),
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = Color.White
+                        containerColor = Color(0xFFFFDCDF)
+                    ),
+                    border = BorderStroke(
+                        width = 1.dp,
+                        color = Color(0xFFFF5969)
                     )
                 ) {
                     Box(
                         modifier = Modifier
+                            .padding(horizontal = 12.dp)
                             .clickable {
                                 openGoogleSignIn()
                             }
@@ -600,18 +561,6 @@ fun LoginScreenWithGoogle(
                     }
                 }
             }
-
-            // Decorative Element
-            Box(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .size(100.dp)
-                    .background(
-                        color = Color33FF69B4,
-                        shape = CircleShape
-                    )
-            )
-
 
         }
     }

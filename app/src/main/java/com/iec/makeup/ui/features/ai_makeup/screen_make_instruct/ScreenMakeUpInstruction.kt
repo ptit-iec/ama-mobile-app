@@ -44,13 +44,14 @@ import dev.jeziellago.compose.markdowntext.MarkdownText
 @Composable
 fun ScreenMakeUpInstruction(
     navBack: () -> Unit = {},
-    viewModel: ScreenChatWithAIVM
+    conversationID: String = ""
 ) {
+    val viewModel: ScreenChatWithAIVM = hiltViewModel()
     val state = viewModel.state.collectAsStateWithLifecycle()
     val effect = viewModel.effect.collectAsStateWithLifecycle(null)
     LaunchedEffect(Unit) {
         Log.d("ViewModel hash", viewModel.hashCode().toString())
-        viewModel.getInstruction()
+        viewModel.getInstruction(conversationID)
     }
     effect.value?.let {
         if ( it is ScreenChatWithAIEffect.OnErrorEffect && it.message != null) {

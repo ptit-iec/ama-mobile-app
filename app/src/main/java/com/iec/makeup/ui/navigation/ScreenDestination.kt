@@ -130,8 +130,8 @@ sealed class Routes(
         ) = "interaction/$interactionPrompt/$interactionImage/$interactionMakeupType"
     }
 
-    data object ScreenMakeUpInstruction: Routes("makeup_instruction") {
-        fun createRoute() = "makeup_instruction"
+    data object ScreenMakeUpInstruction: Routes("makeup_instruction/{$INTERACTION_INSTRUCTION}") {
+        fun createRoute( id: String) = "makeup_instruction/$id"
     }
 
     data object ScreenExpertsRecommended: Routes("experts_recommended/{${QUESTION_ID}}") {
@@ -171,7 +171,7 @@ sealed class Routes(
         const val INTERACTION_PROMPT = "interaction_prompt"
         const val INTERACTION_IMAGE = "interaction_image"
         const val INTERACTION_MAKEUP_TYPE = "interaction_makeup_type"
-
+        const val INTERACTION_INSTRUCTION = "interaction_instruction"
         const val CONVERSATION_ID = "conversation_id"
         const val IMAGE_INIT_ID = "image_id"
 

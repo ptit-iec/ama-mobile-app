@@ -213,9 +213,9 @@ class ScreenChatWithAIVM @Inject constructor(
     }
 
 
-    fun getInstruction() {
+    fun getInstruction(conversationID: String) {
         viewModelScope.launch {
-            getInstructionServer()
+            getInstructionServer(conversationID)
                 .catch {
                     sendEvent(ScreenChatWithAIEvent.OnError("Không thể tải hướng dẫn chi tiết. Vui lòng thử lại sau."))
                 }
@@ -225,8 +225,8 @@ class ScreenChatWithAIVM @Inject constructor(
         }
     }
 
-    private fun getInstructionServer() = callbackFlow {
-        val result = chatbotEndpoint.getInstruction(mapOf("conversationId" to state.value.conversationID))
+    private fun getInstructionServer(conversationID: String) = callbackFlow {
+        val result = chatbotEndpoint.getInstruction(mapOf("conversationId" to conversationID))
         if (result.success == true) {
             trySend(result.data?.markdown)
         }

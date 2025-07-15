@@ -37,6 +37,7 @@ import coil.compose.AsyncImage
 import com.iec.makeup.R
 import com.iec.makeup.core.utils.DateTimeUtils
 import com.iec.makeup.core.utils.DateTimeUtils.isMorning
+import com.iec.makeup.ui.theme.primaryColor
 
 @Preview
 @Composable
@@ -113,7 +114,7 @@ fun TopAppBar(
                     Font(R.font.montserrat)
                 ),
                 modifier = Modifier.padding(vertical = 16.dp),
-                color = Color.White
+                color = primaryColor
             )
 
         }
@@ -126,7 +127,7 @@ fun TopAppBar(
                 .clickable {
                     showNotifications()
                 },
-            tint = Color.White
+            tint = primaryColor
         )
 //        Row {
 //            Icon(

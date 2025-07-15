@@ -1,7 +1,6 @@
 package com.iec.makeup.ui.features.ai_makeup
 
 import android.Manifest
-import android.content.Context
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -23,7 +22,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -38,7 +36,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -69,7 +66,6 @@ import coil3.compose.rememberAsyncImagePainter
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
 import com.iec.makeup.R
-import com.iec.makeup.core.ui.AtomicLoadingDialog
 import com.iec.makeup.core.ui.DialogCompose
 import com.iec.makeup.core.ui.IECTextField
 import com.iec.makeup.ui.LocalAppState
@@ -78,8 +74,8 @@ import com.iec.makeup.ui.features.ai_makeup.business.AIScreenState
 import com.iec.makeup.ui.features.ai_makeup.business.AIScreenVM
 import com.iec.makeup.ui.features.home.components.LogoComponent
 import com.iec.makeup.ui.theme.ColorDB7093
-import com.iec.makeup.ui.theme.ColorFFC1CC
 import com.iec.makeup.ui.theme.ColorFFE4E1
+import com.iec.makeup.ui.theme.primaryColorV2
 import java.io.File
 
 
@@ -303,7 +299,7 @@ fun AIMakeupScreen(
                     modifier = Modifier
                         .clip(RoundedCornerShape(20.dp))
                         .border(
-                            width = 2.dp, color = ColorFFC1CC, shape = RoundedCornerShape(20.dp)
+                            width = 2.dp, color = primaryColorV2, shape = RoundedCornerShape(20.dp)
                         ),
                     elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
                     colors = CardDefaults.cardColors(
@@ -449,7 +445,7 @@ fun AIMakeupScreen(
                 .padding(vertical = 8.dp),
 
             colors = ButtonDefaults.buttonColors(
-                containerColor = ColorFFC1CC
+                containerColor = primaryColorV2
             ),
             shape = RoundedCornerShape(16.dp),
             elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)

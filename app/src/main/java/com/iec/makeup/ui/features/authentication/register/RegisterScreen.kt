@@ -10,7 +10,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -55,13 +54,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.iec.makeup.core.ui.AtomicLoadingDialog
 import com.iec.makeup.core.ui.DialogCompose
 import com.iec.makeup.core.utils.validatesEmailPattern
-import com.iec.makeup.ui.features.authentication.login.LoginScreenEffect
 import com.iec.makeup.ui.theme.Color33FF69B4
 import com.iec.makeup.ui.theme.ColorDB7093
 import com.iec.makeup.ui.theme.ColorFF69B4
-import com.iec.makeup.ui.theme.ColorFFC1CC
 import com.iec.makeup.ui.theme.ColorFFE4E1
 import com.iec.makeup.ui.theme.ColorFFF0F5
+import com.iec.makeup.ui.theme.primaryColorV2
 
 
 @Composable
@@ -111,7 +109,7 @@ fun RegisterScreenStateless(
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        ColorFFC1CC, // Light Pink
+                        primaryColorV2, // Light Pink
                         ColorFFE4E1, // Misty Rose
                         ColorFFF0F5 // Lavender Blush
                     )

@@ -39,7 +39,7 @@ import com.iec.makeup.ui.theme.ColorFAF9F9
 
 const val TAG = "MakeupApp"
 
-val LocalAppState = compositionLocalOf<MakeupAppState> {
+val LocalAppState = compositionLocalOf< MakeupAppState> {
     error("CompositionLocal LocalAppState not present")
 }
 
@@ -71,7 +71,7 @@ fun MakeupApp(
                 NavigationGraph(navController = navController, appState = appState)
             }
 
-            // BottomNavigationBar (conditionally shown)
+            // BottomNavigationBar (conditionally shown)4
             if (isShowBottomNav.value) {
                 Box(
                     modifier = Modifier

@@ -57,7 +57,6 @@ fun NavigationGraph(
     appState: MakeupAppState
 ) {
     NavHost(navController = navController, startDestination = "auth") {
-
         composable(
             route = "makeup://login-success?code={tempCode}",
             deepLinks = listOf(
@@ -447,8 +446,8 @@ fun NavigationGraph(
                                 restoreState = false
                             }
                         },
-                        navToInstruction = {
-                            navController.navigate(Routes.ScreenMakeUpInstruction.createRoute()) {
+                        navToInstruction = { convID ->
+                            navController.navigate(Routes.ScreenMakeUpInstruction.createRoute(convID)) {
                                 restoreState = true
                                 launchSingleTop = true
                             }
@@ -467,13 +466,15 @@ fun NavigationGraph(
                 }
 
                 composable(
-                    route = Routes.ScreenMakeUpInstruction.route
+                    route = Routes.ScreenMakeUpInstruction.route,
+                    arguments = listOf(
+                        navArgument(Routes.INTERACTION_INSTRUCTION) { type = NavType.StringType }
+                    )
                 ) {
-                    val parentEntry = remember { navController.getBackStackEntry("main") }
-                    val viewModel: ScreenChatWithAIVM = hiltViewModel(parentEntry)
+                    val id = it.arguments?.getString(Routes.INTERACTION_INSTRUCTION) ?: ""
                     ScreenMakeUpInstruction(
                         navBack = { navController.popBackStack() },
-                        viewModel = viewModel
+                        conversationID = id
                     )
                 }
 

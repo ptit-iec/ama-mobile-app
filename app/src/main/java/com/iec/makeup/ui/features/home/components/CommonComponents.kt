@@ -41,7 +41,7 @@ import com.iec.makeup.core.model.ui.Expert
 import com.iec.makeup.core.utils.getDistance
 import com.iec.makeup.ui.features.home.helpers.OrderStatusType
 import com.iec.makeup.ui.theme.ColorDB7093
-import com.iec.makeup.ui.theme.ColorFFC1CC
+import com.iec.makeup.ui.theme.primaryColorV2
 
 
 @Composable
@@ -111,7 +111,7 @@ fun OrderChip(
         modifier = Modifier
             .height(32.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(if (isSelected) ColorDB7093 else ColorFFC1CC)
+            .background(if (isSelected) ColorDB7093 else primaryColorV2)
             .padding(horizontal = 16.dp),
         contentAlignment = Alignment.Center
     ) {

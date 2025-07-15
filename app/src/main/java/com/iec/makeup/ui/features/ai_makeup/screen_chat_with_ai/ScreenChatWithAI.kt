@@ -67,7 +67,7 @@ fun ScreenChatWithAI(
     chatBotID: String = "",
     imageLink: String = "https://pub-bea49f62a5e5402da48a734a9e29f52d.r2.dev/makeup_results/makeup_style_36506ab4-8b52-4340-b972-175937bee3ca.jpg",
     navHome: () -> Unit = {},
-    navToInstruction: () -> Unit = {},
+    navToInstruction: (String) -> Unit = {},
     navToExpertsRcm: (String) -> Unit = {},
     viewModelD: ScreenChatWithAIVM
 ) {
@@ -102,7 +102,9 @@ fun ScreenChatWithAI(
         navBack = navBack,
         state = state.value,
         navHome = navHome,
-        navToInstruction = navToInstruction,
+        navToInstruction = {
+            navToInstruction(state.value.conversationID)
+        },
         navToExpertsRcm = navToExpertsRcm,
         onMessageChange = viewModel::onUserInput,
         onMessageSent = viewModel::onUserSentMessage,

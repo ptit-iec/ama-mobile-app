@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,6 +20,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
@@ -50,6 +52,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -58,6 +61,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import coil.compose.SubcomposeAsyncImage
+import coil.request.ImageRequest
 import com.example.iec.ui.feature.main.message.convertTimeStamp
 import com.iec.makeup.R
 import com.iec.makeup.core.model.HEADER
@@ -227,22 +232,45 @@ fun MessageBubble(
                     }
                 }
                 else if(message.header == HEADER.IMAGE){
+                    val targetWidth = 200.dp
                     Box(
-                        modifier = Modifier.heightIn(max = 200.dp).clickable{
+                        modifier = Modifier.clickable{
                             imageView(message.message)
                         }
                     ){
-                        AsyncImage(
-                            model = message.message,
+                        SubcomposeAsyncImage(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(message.message)
+                                .crossfade(true)
+                                .build(),
                             contentDescription = null,
-                            modifier = Modifier
-                                .clickable(
-                                    interactionSource,
-                                    indication = null
-                                ) {
+                            loading = {
+                                // Optional: Show a placeholder or loading indicator
+                                Box(modifier = Modifier.size(200.dp)) {
+                                    // e.g., CircularProgressIndicator()
+                                }
+                            },
+                            success = { state ->
+                                val painter = state.painter
+                                val intrinsicSize = painter.intrinsicSize
+                                val aspectRatio = if (intrinsicSize.width > 0 && intrinsicSize.height > 0) {
+                                    intrinsicSize.height / intrinsicSize.width
+                                } else {
+                                    1f // fallback to square
+                                }
 
-                                },
-                            contentScale = ContentScale.Crop
+                                Image(
+                                    painter = painter,
+                                    contentDescription = null,
+                                    contentScale = ContentScale.Fit,
+                                    modifier = Modifier
+                                        .width(targetWidth)
+                                        .height(targetWidth * aspectRatio)
+                                )
+                            },
+                            error = {
+                                // Optional: Handle error state
+                            }
                         )
                     }
                 }

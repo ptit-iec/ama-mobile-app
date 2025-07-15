@@ -29,6 +29,7 @@ import javax.inject.Inject
 data class LoginScreenState(
     val isLoading: Boolean = false,
     val isAuthenticated: Boolean = false,
+    val introIndex: Int = IntroScreen.IntroScreenA.ordinal,
     val username: String?,
     val password: String?,
 ) : Reducer.ViewState
@@ -149,11 +150,14 @@ class LoginScreenVM @Inject constructor(
         }
     }
 
+    fun nextIntro(){
+
+    }
     fun doLogin() {
         coroutineScope.launch(Dispatchers.IO) {
             sendEvent(LoginScreenEvent.OnLoadingDialog(true))
             try {
-                withTimeout(5000) {
+                withTimeout(30000) {
                     val result =
                         authRepository.doLogin(state.value.username!!, state.value.password!!)
                     if (result.isSuccessful) {

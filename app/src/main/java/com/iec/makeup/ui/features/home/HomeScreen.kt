@@ -113,24 +113,16 @@ fun AuraBeautyApp(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(ColorFAF9F9)
+            .background(brush = Brush.verticalGradient(
+                colors = listOf(
+                    Color(0xFFFFDCDF),
+                    Color.White
+                )
+            ),)
             .verticalScroll(
                 scrollview
             )
     ) {
-        Box(
-            modifier = Modifier
-                .height(200.dp)
-                .fillMaxWidth()
-                .background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            ColorDB7093,
-                            ColorFAF9F9
-                        )
-                    ),
-                )
-        )
         Column(
             modifier = Modifier.fillMaxSize(),
         ) {

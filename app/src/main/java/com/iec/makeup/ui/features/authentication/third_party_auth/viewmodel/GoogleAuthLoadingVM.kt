@@ -49,7 +49,7 @@ class GoogleAuthLoadingVM @Inject constructor(
         )
         viewModelScope.launch {
             try {
-                withTimeout(5000) {
+                withTimeout(30000) {
                     val result =
                         authRepository.doGoogleLogin(code)
                     if (result.isSuccessful) {
