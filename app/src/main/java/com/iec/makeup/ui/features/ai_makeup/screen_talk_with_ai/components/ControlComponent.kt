@@ -29,13 +29,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.iec.makeup.R
 import com.iec.makeup.utils.SpeechToTextHelper
+import java.util.Locale
 
 
 @Composable
 fun ControlComponent(
+    locale: Locale = Locale.ENGLISH,
     onOpenChat: () -> Unit = {},
     onCancelCall: () -> Unit = {},
-    onReceiveText: (String) -> Unit = {}
+    onReceiveText: (String) -> Unit = {},
+    onStartTalk: () -> Unit = {},
+    onEndTalk: () -> Unit = {},
 ) {
     var isUserSpeaking by remember { mutableStateOf(false) }
     val context = LocalContext.current
@@ -45,8 +49,12 @@ fun ControlComponent(
     ) {
 
         if(isUserSpeaking){
-            speechToText.startListening {
+            onStartTalk()
+            speechToText.startListening(
+                locale
+            ) {
                 onReceiveText(it)
+                onEndTalk()
             }
         }
         Row(

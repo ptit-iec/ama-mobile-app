@@ -1,42 +1,27 @@
-<!--<resources>-->
-<!--    <string name="app_name">Makeup-AI</string>-->
-<!--    <string name="page1">Home</string>-->
-<!--    <string name="page2">AuraAI</string>-->
-<!--    <string name="page3">Buy</string>-->
-<!--    <string name="page4">Account</string>-->
-<!--    <string name="page1_title">Home</string>"-->
-<!--    <string name="page2_title">AuraAI</string>"-->
-<!--    <string name="page3_title">Buy</string>"-->
-<!--    <string name="page4_title">Account</string>"-->
-
-
-<!--    <string name="makeup_layout">Makeup Layout</string>-->
-<!--</resources>-->
-
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Makeup-AI</string>
-    <string name="page1">Trang chủ</string>
+    <string name="app_name" translatable="false">Makeup-AI</string>
+    <string name="page1">Home</string>
     <string name="page2">MakeupAI</string>
-    <string name="page3">Mua</string>
-    <string name="page4">Hồ sơ</string>
+    <string name="page3">Shop</string>
+    <string name="page4">Profile</string>
 
-    <string name="page1_title">Trang chủ</string>"
-    <string name="page2_title">MakeupAI</string>"
-    <string name="page3_title">Mua</string>"
-    <string name="page4_title">Hồ sơ</string>"
+    <string name="page1_title">Home</string>
+    <string name="page2_title">MakeupAI</string>
+    <string name="page3_title">Shop</string>
+    <string name="page4_title">Profile</string>
 
-
-    <string name="makeup_layout">Mẫu makeup có sẵn</string>
-    <string name="expert">Chuyên gia</string>
-    <string name="see_all">Xem tất cả</string>
-    <string name="makeup_experiment">Trải nghiệm Makeup từ AI</string>
-    <string name="instructions">Hướng dẫn\n</string>
-    <string name="booking">Đặt lịch với chuyên gia</string>
-    <string name="recommend_makeup">Gợi ý makeup</string>
-    <string name="chat_with_ai">Chat với AI</string>
-    <string name="book">Đặt lịch</string>
-    <string name="see_profile">Xem hồ sơ</string>
-    <string name="describe_expectation">Mô tả mong muốn mẫu makeup</string>
-    <string name="booking_history">Lịch hẹn</string>
-    <string name="booking_detail">Thông tin chi tiết</string>
+    <string name="makeup_layout">Available Makeup Looks</string>
+    <string name="expert">Expert</string>
+    <string name="see_all">See All</string>
+    <string name="makeup_experiment">AI Makeup Experience</string>
+    <string name="instructions">Instructions\n</string>
+    <string name="booking">Book an Appointment with an Expert</string>
+    <string name="recommend_makeup">Makeup Recommendations</string>
+    <string name="chat_with_ai">Chat with AI</string>
+    <string name="book">Book</string>
+    <string name="see_profile">View Profile</string>
+    <string name="describe_expectation">Describe Desired Makeup Look</string>
+    <string name="booking_history">Appointment History</string>
+    <string name="booking_detail">Appointment Details</string>
 </resources>

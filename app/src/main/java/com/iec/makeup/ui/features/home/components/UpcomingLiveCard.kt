@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
@@ -34,6 +35,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.iec.makeup.R
 import com.iec.makeup.ui.theme.ColorDB7093
 import com.iec.makeup.ui.theme.ColorFFE4E1
@@ -128,7 +130,7 @@ fun InfoCard(
 
 @Composable
 fun AutoScrollingHorizontalCardList(
-    items: List<CardItemData>,
+    items: List<Int>,
     modifier: Modifier = Modifier,
     autoScrollDurationMillis: Long = 3000L // Time each item is visible
 ) {
@@ -175,39 +177,28 @@ fun AutoScrollingHorizontalCardList(
     ) {
         items(
             items = items,
-            key = { item -> item.id } // Use unique ID for stable recomposition
         ) { item ->
-            InfoCard(item = item)
+//            Image(
+//                painter = painterResource(id = item),
+//                contentDescription = "Image",
+//                modifier = Modifier.fillMaxWidth().heightIn(max = 120.dp),
+//                contentScale = ContentScale.Crop
+//            )
+            AsyncImage(
+                model = "https://i.natgeofe.com/n/390ff269-06b1-4d0c-aeb8-2ff653ec35cc/maui-hula-01.jpg",
+                contentDescription = "Image",
+                modifier = Modifier.fillMaxWidth().heightIn(max = 120.dp),
+                contentScale = ContentScale.Crop
+            )
         }
     }
 }
 
-fun getSampleCardData(): List<CardItemData> {
-    val dateFormat = SimpleDateFormat("MMM dd, HH:mm", Locale.getDefault())
-    return List(10) { index ->
-        CardItemData(
-            id = index,
-            name = "Tutorial $index",
-            description = "This tutorial covers the basics of Make up Session $index",
-            dateTime = dateFormat.format(Date()),
-            imageSource = R.drawable.pick1 // Replace with R.drawable.your_image or URL String later
-            // Example with drawable: imageSource = R.drawable.placeholder_image
-        )
-    }
-}
-
-@Composable
-fun AutoScrollScreen() {
-    val sampleData = remember { getSampleCardData() }
-
-    Column(modifier = Modifier.padding(vertical = 16.dp)) {
-        AutoScrollingHorizontalCardList(items = sampleData)
-        // Add other content below if needed
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun AutoScrollScreenPreview() {
-    AutoScrollScreen()
+fun getSampleCardData(): List<Int> {
+    return listOf(
+        R.drawable.card1,
+        R.drawable.card2,
+        R.drawable.card3,
+        R.drawable.card4
+    )
 }

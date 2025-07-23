@@ -14,10 +14,10 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun ProcessThinkingComponent(
-    message: String = "Processing..."
+    message: String = "Processing...",
 ) {
     var showText by remember { mutableStateOf("") }
-    LaunchedEffect(Unit) {
+    LaunchedEffect(key1 = message) {
         var i = 0
         while (showText.length < message.length) {
             showText += message[i++]

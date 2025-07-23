@@ -25,7 +25,7 @@ fun convertURItoMultipart(uri: Uri, context: Context, fieldName: String = "makeu
             inputStream?.copyTo(fileOut)
         }
 
-        val requestBody = tempFile.asRequestBody("image/png".toMediaTypeOrNull())
+        val requestBody = tempFile.asRequestBody("image/webp".toMediaTypeOrNull())
         val file = inputStream?.let {
             MultipartBody.Part.createFormData(
                 fieldName,

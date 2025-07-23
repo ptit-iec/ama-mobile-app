@@ -375,16 +375,10 @@ fun NavigationGraph(
 //                    )
                     ScreenTalkWithAI(
                         navBack = {
-                            navController.navigate(
-                                Routes.MainHome.createRoute(
-                                )
-                            ){
-                                popUpTo(Routes.MainHome.route){
-                                    inclusive = false
-                                }
-                                launchSingleTop = true
-                                restoreState = false
-                            }
+                            appState.setVisibleBottomNav(true)
+                            appState.navigateToTopLevelDestination(
+                                TopLevelDestination.Page1
+                            )
                         }
                     )
                 }

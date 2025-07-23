@@ -18,17 +18,18 @@ class SpeechToTextHelper(val context: Context) {
 
     private val intentLocale = Intent("android.speech.action.RECOGNIZE_SPEECH").apply {
         putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
     }
 
     fun startListening(
-        onResult: (String) -> Unit
+        customLocale: Locale? = null,
+        onResult: (String) -> Unit,
     ) {
         speechRecognizer.setRecognitionListener(object : RecognitionListener {
             override fun onResults(results: Bundle) {
                 val matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                 if (!matches.isNullOrEmpty()) {
                     val spokenText = matches.first()
+                    Log.d("SpeechToTextHelper", "Spoken text: $spokenText")
                     onResult(spokenText)
                 }
             }
@@ -49,6 +50,11 @@ class SpeechToTextHelper(val context: Context) {
             override fun onPartialResults(partialResults: Bundle) {}
             override fun onEvent(eventType: Int, params: Bundle) {}
         })
+        if(customLocale != null) {
+            intentLocale.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale("vn", "VN"))
+        }else{
+            intentLocale.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
+        }
         speechRecognizer.startListening(intentLocale)
     }
 

@@ -17,6 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
@@ -33,6 +34,9 @@ fun StatusListShow(
 ){
     val lazyColumnState = rememberLazyListState()
 
+    LaunchedEffect(Unit) {
+
+    }
     LazyColumn(
         modifier = modifier,
         state = lazyColumnState
@@ -51,6 +55,7 @@ fun StatusListShow(
                 Text(
                     text = statusList[index],
                     modifier = Modifier.fillMaxWidth().padding(start = 16.dp),
+                    textAlign = TextAlign.Start
                 )
             }
         }

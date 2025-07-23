@@ -1,26 +1,35 @@
 package com.iec.makeup.ui.features.ai_makeup.screen_talk_with_ai
 
+import android.content.Context
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.iec.makeup.core.BaseViewModel
 import com.iec.makeup.core.Reducer
+import com.iec.makeup.core.utils.convertURItoMultipart
 import com.iec.makeup.data.remote.api.ver2.ChatRequest
 import com.iec.makeup.data.remote.api.ver2.TalkAIEndpoint
 import com.iec.makeup.network.ver2.SSEClient
 import com.iec.makeup.network.ver2.SSEHandler
 import com.iec.makeup.network.ver2.SessionObject
+import com.iec.makeup.ui.features.ai_makeup.business.AIScreenEvent
 import com.iec.makeup.ui.features.ai_makeup.screen_talk_with_ai.model.DataEventAgentResponse
 import com.iec.makeup.ui.features.ai_makeup.screen_talk_with_ai.model.DataEventStatus
 import com.iec.makeup.ui.features.ai_makeup.screen_talk_with_ai.model.DataEventThinking
 import com.iec.makeup.ui.features.ai_makeup.screen_talk_with_ai.model.EventDataClass
 import com.launchdarkly.eventsource.MessageEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import io.ktor.http.parsing.ParseException
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.toRequestBody
 import javax.inject.Inject
 
 
@@ -30,8 +39,9 @@ data class ScreenTalkViewState(
     val modifyBoxState: Boolean = false,
     val thinkingMode: String? = null,
     val statusAI: List<String> = emptyList(),
-    val responseAI: String? = null
-
+    val responseAI: String? = null,
+    val imageUri: Uri? = null,
+    val imageResult: String? = null
 ): Reducer.ViewState
 
 
@@ -49,6 +59,9 @@ sealed class ScreenTalkViewEvent : Reducer.ViewEvent {
         val status: String
     ): ScreenTalkViewEvent()
     data object ClearStatus: ScreenTalkViewEvent()
+    data class OnUploadImage(val uri: Uri) : ScreenTalkViewEvent()
+    data class OnCaptureImage(val uri: Uri) : ScreenTalkViewEvent()
+    data class onImageResult(val result: String?) : ScreenTalkViewEvent()
 }
 
 sealed class ScreenTalkViewEffect: Reducer.ViewEffect {
@@ -83,6 +96,17 @@ class ScreenTalkReducer : Reducer<ScreenTalkViewState, ScreenTalkViewEvent, Scre
             ScreenTalkViewEvent.ClearStatus -> {
                 currentState.copy(statusAI = listOf()) to null
             }
+
+            is ScreenTalkViewEvent.OnCaptureImage -> {
+                currentState.copy(imageUri = event.uri) to null
+            }
+            is ScreenTalkViewEvent.OnUploadImage ->{
+                currentState.copy(imageUri = event.uri) to null
+            }
+
+            is ScreenTalkViewEvent.onImageResult -> {
+                currentState.copy(imageResult = event.result) to null
+            }
         }
     }
 }
@@ -91,7 +115,8 @@ class ScreenTalkReducer : Reducer<ScreenTalkViewState, ScreenTalkViewEvent, Scre
 @HiltViewModel
 class ScreenTalkVM @Inject constructor(
     val sseClient: SSEClient,
-    val talkAIEndpoint: TalkAIEndpoint
+    val talkAIEndpoint: TalkAIEndpoint,
+    @ApplicationContext val context: Context
 ): BaseViewModel<ScreenTalkViewState, ScreenTalkViewEvent, ScreenTalkViewEffect>(
     initialState = ScreenTalkViewState(),
     reducer = ScreenTalkReducer()
@@ -130,13 +155,37 @@ class ScreenTalkVM @Inject constructor(
     }
     private fun sendChatMessage(message: String){
         viewModelScope.launch {
-
-            talkAIEndpoint.sendNormalMessage(
-                ChatRequest(
-                    message,
-                    SessionObject.sessionID
+            if(state.value.imageUri != null){
+                val imagePath = state.value.imageUri
+                try {
+                    convertURItoMultipart(
+                        uri = imagePath!!,
+                        context = context,
+                        fieldName = "file"
+                    ).onEach { it ->
+                        try {
+                            talkAIEndpoint.sendImageAndChatMessage(
+                                file = it,
+                                message = message.toRequestBody("text/plain".toMediaTypeOrNull()),
+                                sessionId = SessionObject.sessionID.toRequestBody("text/plain".toMediaTypeOrNull()),
+                                showThinking = "true".toRequestBody("text/plain".toMediaTypeOrNull())
+                            )
+                        }catch (e: Exception){
+                            Log.d("AIScreenVM", "submitImageToServer: ${e.message}")
+                        }
+                    }.launchIn(viewModelScope)
+                }catch (e: Exception){
+                    Log.d("AIScreenVM", "submitImageToServer: ${e.message}")
+                }
+            }
+            else{
+                talkAIEndpoint.sendNormalMessage(
+                    ChatRequest(
+                        message,
+                        SessionObject.sessionID
+                    )
                 )
-            )
+            }
         }
     }
 
@@ -148,7 +197,14 @@ class ScreenTalkVM @Inject constructor(
     override fun onSSEConnectionClosed() {
         Log.d("ScreenTalkVM", "onSSEConnectionClosed")
     }
-
+    fun uploadImage(uri: Uri) {
+        sendEvent(ScreenTalkViewEvent.OnUploadImage(uri))
+        sendEvent(ScreenTalkViewEvent.AIResponse("I've received your image. Please describe your makeup needs."))
+    }
+    fun captureImage(uri: Uri) {
+        sendEvent(ScreenTalkViewEvent.OnCaptureImage(uri))
+        sendEvent(ScreenTalkViewEvent.AIResponse("I've received your image. Please describe your makeup needs."))
+    }
     override fun onSSEEventReceived(event: String, messageEvent: MessageEvent) {
         Log.d("ScreenTalkVM", "onSSEEventReceived: event: $event, data: ${messageEvent.data}")
         when(event){
@@ -162,9 +218,16 @@ class ScreenTalkVM @Inject constructor(
                     null
                 }
                 dataResponse?.let {
-                    sendEvent(ScreenTalkViewEvent.AIResponse(
-                        it.data.response
-                    ))
+                    var response = it.data.response
+                    extractURLFromMessage(it.data.response)?.let { url ->
+                        if(url.startsWith("result")){
+                            sendEvent(ScreenTalkViewEvent.onImageResult(url))
+                            response = response.replace(url, "")
+                        }
+                    }
+                    if(response.isNotEmpty()){
+                        sendEvent(ScreenTalkViewEvent.AIResponse(response))
+                    }
                 }
             }
             "thinking" -> {
@@ -192,18 +255,28 @@ class ScreenTalkVM @Inject constructor(
                     null
                 }
                 dataResponse?.let {
-                    sendEvent(ScreenTalkViewEvent.AIStatus(
-                        it.data.details?.message ?: "Completed..."
-                    ))
+                    it.data.details?.message?.let { message ->
+                        sendEvent(ScreenTalkViewEvent.AIStatus(
+                            message
+                        ))
+                    }
+
                 }
             }
         }
     }
-
+    private fun extractURLFromMessage(message: String): String? {
+        val regex = Regex("""\([^()]*\)""")
+        val urlFound = regex.find(message)
+        return urlFound?.value
+    }
     override fun onSSEError(t: Throwable) {
         Log.d("ScreenTalkVM", "onSSEError: ${t.message}")
-
         sendEvent(ScreenTalkViewEvent.connectSSEState("Error: ${t.message}"))
+    }
+
+    fun resetImageResult(){
+        sendEvent(ScreenTalkViewEvent.onImageResult(null))
     }
 
 }

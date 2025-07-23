@@ -36,26 +36,26 @@ enum class IntroScreen(
     IntroScreenA(
         id = 1,
         image = R.drawable.intro1,
-        title = "Trợ lý AI Makeup",
-        description = "Cố vấn sắc đẹp cá nhân của bạn được hỗ trợ bởi trí tuệ nhân tạo"
+        title = "AI Makeup Assistant",
+        description = "Your personal beauty advisor powered by artificial intelligence"
     ),
     IntroScreenB(
         id = 2,
         image = R.drawable.intro2,
-        title = "Gợi ý trang điểm phù hợp",
-        description = "Gợi ý trang điểm hoàn hảo cho các buổi hẹn hò, tiệc tùng hoặc bất kỳ dịp đặc biệt nào"
+        title = "Personalized Makeup Suggestions",
+        description = "Perfect makeup suggestions for dates, parties, or any special occasion"
     ),
     IntroScreenC(
         id = 3,
         image = R.drawable.intro3,
-        title = "Hướng dẫn makeup",
-        description = "Hướng dẫn chi tiết cách tự trang điểm hoàn hảo"
+        title = "Makeup Tutorials",
+        description = "Detailed guides on how to do your own perfect makeup"
     ),
     IntroScreenD(
         id = 4,
         image = R.drawable.intro4,
-        title = "Kết nối chuyên gia",
-        description = "Đặt lịch với chuyên gia trang điểm chuyên nghiệp tại nhà, tại tiệm hoặc qua cuộc gọi video"
+        title = "Connect with Experts",
+        description = "Book appointments with professional makeup artists at home, in-salon, or via video call"
     ),
 }
 

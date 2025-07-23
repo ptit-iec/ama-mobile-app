@@ -553,7 +553,7 @@ fun LoginScreenWithGoogle(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .align(Alignment.Center),
-                            text = "Đăng nhập với Google",
+                            text = "Sign in with Google",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center
