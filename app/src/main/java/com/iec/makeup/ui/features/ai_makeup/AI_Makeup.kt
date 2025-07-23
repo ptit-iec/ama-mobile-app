@@ -432,9 +432,6 @@ fun AIMakeupScreen(
             }
 
             Spacer(modifier = Modifier.height(50.dp))
-
-            // Start button with gradient and animation
-
         }
         Button(
             onClick = {

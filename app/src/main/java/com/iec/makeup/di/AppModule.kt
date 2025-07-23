@@ -14,6 +14,7 @@ import com.iec.makeup.data.remote.api.MakeUpTemplateEndpoint
 import com.iec.makeup.data.remote.api.ProfileEndpoint
 import com.iec.makeup.data.remote.api.PromptEndpoint
 import com.iec.makeup.data.remote.api.UserEndpoint
+import com.iec.makeup.data.remote.api.ver2.TalkAIEndpoint
 import com.iec.makeup.data.repository_implement.ExpertRepositoryImpl
 import com.iec.makeup.data.repository_implement.MakeUpTemplateCategoryImpl
 import com.iec.makeup.data.repository_implement.MakeUpTemplateRepositoryImpl
@@ -26,6 +27,7 @@ import com.iec.makeup.data.repository.MakeUpTemplateCategoryRepository
 import com.iec.makeup.data.repository.MakeUpTemplateRepository
 import com.iec.makeup.data.repository.MessageChatRepository
 import com.iec.makeup.data.repository_implement.BookingRepositoryImpl
+import com.iec.makeup.network.ver2.BASE_URL_SSE
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -106,6 +108,24 @@ class AppModule {
             .build()
     }
 
+    @Provides
+    @Named("AIVer2")
+    fun provideAIVer2(): Retrofit {
+        val loggingInterceptor = HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        }
+        val okHttpClient = OkHttpClient.Builder()
+            .addInterceptor(loggingInterceptor)
+            .connectTimeout(TIME_OUT, TimeUnit.MILLISECONDS)
+            .build()
+
+
+        return Retrofit.Builder()
+            .baseUrl(BASE_URL_SSE)
+            .client(okHttpClient)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
 
     /*
      - Retrofit Module Injection
@@ -150,6 +170,12 @@ class AppModule {
     @Singleton
     fun provideUserBookingEndpoint(@Named("Auth") retrofit: Retrofit): ProfileEndpoint =
         retrofit.create(ProfileEndpoint::class.java)
+
+    @Provides
+    @Singleton
+    fun provideAIVer2Endpoint(@Named("AIVer2") retrofit: Retrofit): TalkAIEndpoint =
+        retrofit.create(TalkAIEndpoint::class.java)
+
 }
 
 @InstallIn(SingletonComponent::class)

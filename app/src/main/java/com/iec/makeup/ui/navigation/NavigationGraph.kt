@@ -26,6 +26,7 @@ import com.iec.makeup.ui.features.ai_makeup.screen_chat_with_ai.ScreenChatWithAI
 import com.iec.makeup.ui.features.ai_makeup.screen_experts_recommend.ScreenExpertsRcmStateful
 import com.iec.makeup.ui.features.ai_makeup.screen_make_instruct.ScreenMakeUpInstruction
 import com.iec.makeup.ui.features.ai_makeup.screen_response_ai.InteractionScreenStateful
+import com.iec.makeup.ui.features.ai_makeup.screen_talk_with_ai.ScreenTalkWithAI
 import com.iec.makeup.ui.features.authentication.login.LoginScreen
 import com.iec.makeup.ui.features.authentication.register.RegisterScreen
 import com.iec.makeup.ui.features.authentication.third_party_auth.GoogleAuthLoadingScreen
@@ -354,21 +355,36 @@ fun NavigationGraph(
                             type = NavType.StringType
                             defaultValue = ""
                         },
-                    )) {
-                    appState.setVisibleBottomNav(true)
-                    val initialPrompt: String = it.arguments?.getString(ARG_INITIAL_PROMPT) ?: ""
-                    VirtualScreen(
-                        initialPrompts = initialPrompt,
-                        navBack = { navController.popBackStack() },
-                        navInstruction = { navController.navigate(Routes.InstructionScreen.createRoute()) },
-                        navInteraction = { prompt, image, id ->
+                    )
+                ) {
+                    appState.setVisibleBottomNav(false)
+//                    val initialPrompt: String = it.arguments?.getString(ARG_INITIAL_PROMPT) ?: ""
+//                    VirtualScreen(
+//                        initialPrompts = initialPrompt,
+//                        navBack = { navController.popBackStack() },
+//                        navInstruction = { navController.navigate(Routes.InstructionScreen.createRoute()) },
+//                        navInteraction = { prompt, image, id ->
+//                            navController.navigate(
+//                                Routes.ScreenInteractionRoutes.createRoute(
+//                                    prompt,
+//                                    image,
+//                                    id
+//                                )
+//                            )
+//                        }
+//                    )
+                    ScreenTalkWithAI(
+                        navBack = {
                             navController.navigate(
-                                Routes.ScreenInteractionRoutes.createRoute(
-                                    prompt,
-                                    image,
-                                    id
+                                Routes.MainHome.createRoute(
                                 )
-                            )
+                            ){
+                                popUpTo(Routes.MainHome.route){
+                                    inclusive = false
+                                }
+                                launchSingleTop = true
+                                restoreState = false
+                            }
                         }
                     )
                 }
@@ -436,7 +452,7 @@ fun NavigationGraph(
                         navBack = {
                             navController.popBackStack()
 
-                                  },
+                        },
                         navHome = {
                             navController.navigate(Routes.Page2.createRoute()) {
                                 popUpTo(Routes.Page2.createRoute()) {

@@ -118,7 +118,7 @@ dependencies {
     // Retrofit
     implementation(libs.retrofit.v290)
     implementation(libs.converter.gson.v290)
-
+    implementation("com.google.code.gson:gson:2.13.1")
     // Hilt
     implementation(libs.hilt.android.v250)
     kapt(libs.hilt.compiler)
@@ -178,5 +178,10 @@ dependencies {
     implementation(libs.compose.markdown)
     implementation("com.google.accompanist:accompanist-pager:0.34.0")
     implementation("com.google.accompanist:accompanist-pager-indicators:0.34.0")
+
+    implementation("com.squareup.okhttp3:okhttp:4.9.0")
+    implementation("com.launchdarkly:okhttp-eventsource:2.5.0")
+
+    implementation("com.airbnb.android:lottie-compose:4.0.0")
 
 }
