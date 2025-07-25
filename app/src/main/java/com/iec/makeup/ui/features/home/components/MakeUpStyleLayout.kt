@@ -3,6 +3,7 @@ package com.iec.makeup.ui.features.home.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -37,8 +38,10 @@ fun MakeUpStyleLayout(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Card(
-            modifier = Modifier.size(120.dp),
-            shape = CircleShape,
+            modifier = Modifier
+                .width(99.dp)
+                .height(120.dp),
+            shape = RoundedCornerShape(24.dp),
             elevation = CardDefaults.cardElevation(0.dp),
         ) {
             AsyncImage(
@@ -51,9 +54,10 @@ fun MakeUpStyleLayout(
         Text(
             text = item.title,
             textAlign = TextAlign.Center,
-            fontSize = 12.sp,
-            color = Color.Black,
+            fontSize = 13.sp,
+            color = Color.DarkGray,
             maxLines = 1,
+            fontWeight = FontWeight.Bold,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.width(80.dp),
 

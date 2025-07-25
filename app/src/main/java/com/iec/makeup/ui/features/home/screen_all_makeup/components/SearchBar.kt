@@ -47,7 +47,7 @@ fun SearchBar(
         Icon(
             imageVector = Icons.Default.ArrowBackIosNew,
             contentDescription = "Back",
-            tint = Color.White,
+            tint = Color.DarkGray,
             modifier = Modifier
                 .padding(8.dp)
                 .size(22.dp)

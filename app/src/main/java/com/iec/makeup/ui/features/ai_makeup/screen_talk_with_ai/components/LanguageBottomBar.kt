@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import java.util.Locale
@@ -33,6 +34,15 @@ data class SupportLanguage(
     val language: String,
     val code: String
 )
+
+@Preview
+@Composable
+fun LanguageBottomBarPreview() {
+    LanguageBottomBar(
+        onDismissRequest = {},
+        onSelectLang = {}
+    )
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,13 +70,6 @@ fun LanguageBottomBar(
                 .padding(bottom = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                "Choose language to interact",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                textAlign = TextAlign.Center
-            )
             languages.forEachIndexed { index, language ->
                 Row(
                     modifier = Modifier

@@ -8,10 +8,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.*
@@ -37,11 +40,14 @@ import com.iec.makeup.R
 import com.iec.makeup.core.model.ui.MakeUpTemplateLayout
 import com.iec.makeup.core.model.ui.mockMakeUpTemplateLayout
 import com.iec.makeup.core.ui.AtomicLoadingDialog
+import com.iec.makeup.core.ui.noRippleClickable
 import com.iec.makeup.ui.LocalAppState
 import com.iec.makeup.ui.features.home.screen_all_makeup_template.viewmodel.ScreenAllMakeUpTemplateEffect
 import com.iec.makeup.ui.features.home.screen_all_makeup_template.viewmodel.ScreenAllMakeUpTemplateViewState
 import com.iec.makeup.ui.features.home.screen_all_makeup_template.viewmodel.ScreenAllMakeupTemplateVM
 import com.iec.makeup.ui.theme.ColorDB7093
+import com.iec.makeup.ui.theme.onPrimaryColor
+import com.iec.makeup.ui.theme.primaryColorV2
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
@@ -90,22 +96,14 @@ fun ScreenAllMakeupTemplateOfCategoryStateless(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(80.dp)
-                .background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            ColorDB7093,
-                            Color.White
-                        )
-                    ),
-                )
                 .padding(16.dp),
         ) {
             Icon(
-                imageVector = Icons.Default.ArrowBack,
+                imageVector = Icons.Default.ArrowBackIosNew,
                 contentDescription = "Back",
-                tint = Color.White,
+                tint = Color.DarkGray,
                 modifier = Modifier
-                    .size(24.dp)
+                    .fillMaxHeight()
                     .clickable {
                         navBack()
                     }
@@ -113,9 +111,14 @@ fun ScreenAllMakeupTemplateOfCategoryStateless(
             Text(
                 text = layout,
                 style = MaterialTheme.typography.titleLarge,
-                color = Color.White,
+                color = Color.DarkGray,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.align(Alignment.Center)
+                    .background(
+                        color = Color(0xFFFFD6D6),
+                        shape = RoundedCornerShape(8.dp)
+                    )
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
             )
         }
 
@@ -131,85 +134,37 @@ fun ScreenAllMakeupTemplateOfCategory(
     data: List<MakeUpTemplateLayout>,
     onClick: (String) -> Unit = {}
 ) {
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
-        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+    LazyVerticalStaggeredGrid(
+        columns = StaggeredGridCells.Fixed(2),
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(8.dp),
+        verticalItemSpacing = 12.dp,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(data.size) { index ->
-            PhotoCard(
-                title = data[index].title ?: "",
-                image = data[index].thumbnail ?: "",
-                isFavorite = false,
+            Box(
                 modifier = Modifier
-                    .padding(8.dp)
-                    .fillMaxWidth()
-                    .clickable { onClick(Json.encodeToString(data[index])) }
-            )
+                    .noRippleClickable {
+                        onClick(Json.encodeToString(data[index]))
+                    }
+                    .clip(RoundedCornerShape(8.dp))
+                    .width(100.dp)
+                    .height(if(index == 0 || index % 4 == 0 || (index + 1) % 4 == 0) 180.dp else 240.dp)
+
+            ) {
+                // Replace with your actual image resource
+                AsyncImage(
+                    model = data[index].thumbnail,
+                    error = painterResource(R.drawable.internet),
+                    contentDescription = "Photo",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
         }
     }
 }
 
-@Composable
-fun FilterButton(
-    text: String,
-    selected: Boolean,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        colors = CardDefaults.cardColors(
-            containerColor = Color.White
-        ),
-        modifier = Modifier.padding(vertical = 12.dp)
-    ) {
-        Box(
-            modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp)
-        ) {
-            Text(
-                text = text,
-                fontSize = 12.sp,
-                color = if (selected) Color(0xFFFF6B78) else Color.Gray,
-                fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-            )
-        }
-    }
-}
-
-@Composable
-fun PhotoCard(
-    title: String,
-    image: String,
-    isFavorite: Boolean,
-    modifier: Modifier = Modifier
-) {
-    Column {
-        Box(
-            modifier = modifier
-                .clip(RoundedCornerShape(8.dp))
-                .width(100.dp)
-                .height(180.dp)
-        ) {
-            // Replace with your actual image resource
-            AsyncImage(
-                model = image,
-                error = painterResource(R.drawable.internet),
-                contentDescription = "Photo",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize()
-            )
-        }
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 4.dp),
-            textAlign = TextAlign.Center,
-            overflow = TextOverflow.Ellipsis,
-            maxLines = 1
-        )
-    }
-}
 
 @Preview
 @Composable

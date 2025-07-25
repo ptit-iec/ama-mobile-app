@@ -29,6 +29,7 @@ import com.iec.makeup.ui.features.home.screen_all_makeup.components.ExpertDetail
 import com.iec.makeup.ui.features.home.screen_all_makeup.components.SearchBar
 import com.iec.makeup.ui.theme.ColorDB7093
 import com.iec.makeup.ui.theme.ColorFAF9F9
+import com.iec.makeup.ui.theme.primaryColorV2
 
 
 @Composable
@@ -83,7 +84,7 @@ fun AllMakeUpScreenStateless(
                 .background(
                     brush = Brush.verticalGradient(
                         colors = listOf(
-                            ColorDB7093,
+                            primaryColorV2,
                             ColorFAF9F9
                         )
                     ),

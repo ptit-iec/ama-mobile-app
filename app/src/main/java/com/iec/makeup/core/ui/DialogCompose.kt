@@ -71,7 +71,7 @@ fun DialogCompose(
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Text(
-                        text = "Thông báo",
+                        text = "Notification",
                         modifier = Modifier.fillMaxWidth(),
                         textAlign = TextAlign.Center,
                         style = TextStyle(
@@ -131,7 +131,7 @@ fun DialogCompose(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = "Từ chối",
+                                    text = "Continue",
                                     color = Color.Black,
                                     style = TextStyle(
                                         fontWeight = FontWeight.Bold
@@ -158,7 +158,7 @@ fun DialogCompose(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = "Đồng ý",
+                                text = "Exit now",
                                 color = Color.White,
                                 style = TextStyle(
                                     fontWeight = FontWeight.Bold

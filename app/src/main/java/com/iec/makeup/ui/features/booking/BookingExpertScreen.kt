@@ -17,18 +17,37 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.iec.makeup.core.ui.IECText
 import com.iec.makeup.ui.theme.primaryColor
+import androidx.compose.foundation.clickable
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.ExperimentalMaterial3Api
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BookingScreen(
     navBack: () -> Unit = {},
     navToComplete: () -> Unit = {}
 ) {
+    // State for dropdowns and pickers
+    var selectedForm by remember { mutableStateOf("At Home") }
+    var showFormDropdown by remember { mutableStateOf(false) }
+    val formOptions = listOf("At Home", "At Salon")
+
+    // Date picker state
+    val datePickerState = rememberDatePickerState()
+    var selectedDateTime by remember { mutableStateOf("06/02/2025 20:00") }
+    var showDateTimePicker by remember { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        "ĐẶT LỊCH HẸN",
+                        "BOOK APPOINTMENT",
                         color = primaryColor,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold
@@ -54,7 +73,7 @@ fun BookingScreen(
         ) {
             // User Information Section
             Text(
-                "Thông tin của Nguyễn Thảo Linh:",
+                "Information for John Doe:",
                 fontSize = 16.sp,
                 color = Color.Gray,
                 modifier = Modifier.padding(bottom = 8.dp)
@@ -65,12 +84,12 @@ fun BookingScreen(
             ) {
                 InfoCard(
                     icon = Icons.Default.LocationOn,
-                    text = "122 Hoàng Quốc Việt, Cổ Nhuế,\nCầu Giấy, Hà Nội"
+                    text = "123 Main Street, Central City, NY"
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 InfoCard(
                     icon = Icons.Default.Phone,
-                    text = "0828421384"
+                    text = "123-456-7890"
                 )
             }
 
@@ -78,7 +97,7 @@ fun BookingScreen(
 
             // Appointment Details Section
             Text(
-                "Cuộc hẹn makeup của bạn:",
+                "Your makeup appointment:",
                 fontSize = 16.sp,
                 color = Color.Gray,
                 modifier = Modifier.padding(bottom = 8.dp)
@@ -86,36 +105,81 @@ fun BookingScreen(
 
             AppointmentDetailRow(
                 icon = Icons.Default.Person,
-                label = "Chuyên gia:",
-                value = "Bùi Mai Linh"
+                label = "Expert:",
+                value = "Mai Linh Bui"
             )
+            // Form selection (clickable)
             AppointmentDetailRow(
                 icon = Icons.Default.Code, // Using Code as a placeholder icon
-                label = "Chọn hình thức",
-                value = "Tại nhà",
-                showDropdown = true
+                label = "Form:",
+                value = selectedForm,
+                showDropdown = true,
+                onClick = { showFormDropdown = true }
             )
+            if (showFormDropdown) {
+                DropdownMenu(
+                    expanded = showFormDropdown,
+                    onDismissRequest = { showFormDropdown = false }
+                ) {
+                    formOptions.forEach { option ->
+                        DropdownMenuItem(onClick = {
+                            selectedForm = option
+                            showFormDropdown = false
+                        }) {
+                            Text(option)
+                        }
+                    }
+                }
+            }
+            // Date/time picker (clickable)
             AppointmentDetailRow(
                 icon = Icons.Default.CalendarToday,
-                label = "Chọn thời gian",
-                value = "06/02/2025 20:00",
-                showDropdown = true // Represents a date/time picker
+                label = "Date & Time:",
+                value = selectedDateTime,
+                showDropdown = true,
+                onClick = { showDateTimePicker = true }
             )
+            // Material3 DatePickerDialog
+            if (showDateTimePicker) {
+                DatePickerDialog(
+                    onDismissRequest = { showDateTimePicker = false },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            val millis = datePickerState.selectedDateMillis
+                            if (millis != null) {
+                                val date = Date(millis)
+                                val formatted = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(date)
+                                selectedDateTime = "$formatted 20:00" // Keep time static for now
+                            }
+                            showDateTimePicker = false
+                        }) {
+                            Text("OK")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showDateTimePicker = false }) {
+                            Text("Cancel")
+                        }
+                    }
+                ) {
+                    DatePicker(state = datePickerState)
+                }
+            }
             AppointmentDetailRow(
                 icon = Icons.Default.FavoriteBorder,
-                label = "Loại makeup:",
-                value = "Dự tiệc",
-                showImageIcon = true // Represents an image/icon next to the value
+                label = "Makeup type:",
+                value = "Party",
+                showImageIcon = true
             )
             AppointmentDetailRow(
                 icon = Icons.Default.AttachMoney, // Using AttachMoney as a placeholder icon
-                label = "Giá tiền makeup:",
-                value = "350.000VNĐ"
+                label = "Makeup price:",
+                value = "350,000 VND"
             )
             AppointmentDetailRow(
                 icon = Icons.Default.DirectionsCar, // Using DirectionsCar as a placeholder icon
-                label = "Chi phí di chuyển:",
-                value = "0VNĐ"
+                label = "Travel fee:",
+                value = "0 VND"
             )
 
             Spacer(modifier = Modifier.weight(1f)) // Pushes the total and button to the bottom
@@ -126,9 +190,9 @@ fun BookingScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Tổng tiền:", fontSize = 18.sp, color = Color.Black)
+                Text("Total:", fontSize = 18.sp, color = Color.Black)
                 Text(
-                    "350.000VNĐ",
+                    "350,000 VND",
                     fontSize = 20.sp,
                     color = primaryColor,
                     fontWeight = FontWeight.Bold
@@ -148,7 +212,7 @@ fun BookingScreen(
                 colors = ButtonDefaults.buttonColors(backgroundColor = primaryColor),
                 shape = RoundedCornerShape(8.dp)
             ) {
-                Text("Xác nhận", color = Color.White, fontSize = 18.sp)
+                Text("Confirm", color = Color.White, fontSize = 18.sp)
             }
         }
     }
@@ -177,8 +241,8 @@ fun InfoCard(icon: ImageVector, text: String) {
                 Icon(icon, contentDescription = null, tint = primaryColor)
                 Icon(Icons.Default.Edit, contentDescription = "Edit", tint = Color.Gray)
             }
-            IECText("0384132699", color = Color.Black)
-            IECText(text,color = Color.Black)
+            IECText("123-456-7890", color = Color.Black)
+            IECText(text, color = Color.Black)
         }
     }
 }
@@ -189,12 +253,14 @@ fun AppointmentDetailRow(
     label: String,
     value: String,
     showDropdown: Boolean = false,
-    showImageIcon: Boolean = false
+    showImageIcon: Boolean = false,
+    onClick: (() -> Unit)? = null
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
+            .padding(vertical = 8.dp)
+            .let { if (onClick != null) it.clickable { onClick() } else it },
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(

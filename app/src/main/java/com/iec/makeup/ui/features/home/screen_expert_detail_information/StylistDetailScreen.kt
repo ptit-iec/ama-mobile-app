@@ -1,9 +1,15 @@
 package com.iec.makeup.ui.features.home.screen_expert_detail_information
 
+import android.graphics.Paint.Align
 import android.util.Log
-import androidx.compose.foundation.border
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -33,10 +39,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.iec.makeup.R
 import com.iec.makeup.data.remote.dto.ExpertDetail
+import com.iec.makeup.data.remote.dto.Samples
+import com.iec.makeup.data.remote.dto.UserReviewExpertDTO
 import com.iec.makeup.ui.LocalAppState
 import com.iec.makeup.ui.features.home.screen_expert_detail_information.ui_components.ItemReviewCard
-import com.iec.makeup.ui.theme.ColorDB7093
 import com.iec.makeup.ui.theme.ColorFAF9F9
+import com.iec.makeup.ui.theme.colorBackground
 
 
 enum class PagerTab(val title: String) {
@@ -93,111 +101,190 @@ fun ProfileScreenStateless(
         containerColor = ColorFAF9F9
     ) { paddingValues ->
         state.expertData?.let {
-            Column(
-                modifier = Modifier
-                    .padding(paddingValues)
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState()) // Make the whole column scrollable
-            ) {
-                ProfileHeader(
-                    avatar = state.expertData.avatar,
-                    name = state.expertData.name ?: "Default",
-                    address = state.expertData.address,
-                    description = state.expertData.description
-
-                )
-                ActionButtons(
-                    onActionClick = {
-                        navToBookingScreen(state.expertData.id ?: "")
-                    }
-                )
-                Row(
+            Box(
+                modifier = Modifier.fillMaxSize()
+            ){
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth() // Make the row take the full width
-                        .padding(4.dp), // Add some padding around the row
-                    horizontalArrangement = Arrangement.SpaceEvenly, // Distribute space evenly between items
-                    verticalAlignment = Alignment.CenterVertically // Vertically center the items
+                        .padding(paddingValues)
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState()) // Make the whole column scrollable
                 ) {
-                    // Profile Section
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.clickable {
-                            pagerType = PagerTab.PROFILE
-                        }) {
-                        Icon(
-                            imageVector = Icons.Default.List, // Placeholder icon for "Hồ sơ"
-                            contentDescription = "Profile Icon",
-                            tint = if (pagerType == PagerTab.PROFILE) Color.Red else Color.Black, // Example orange color), // Example color
-                            modifier = Modifier.size(24.dp) // Set icon size
-                        )
-                        Spacer(modifier = Modifier.width(4.dp)) // Add space between icon and text
-                        Text(
-                            text = "Hồ sơ",
-                            color = if (pagerType == PagerTab.PROFILE) Color.Red else Color.Black // Example color for text
-                        )
-                    }
+                    ProfileHeader(
+                        avatar = state.expertData.avatar,
+                        name = state.expertData.name ?: "Default",
+                        address = state.expertData.address,
+                        description = state.expertData.description
 
-                    // Vertical Separator
-                    Divider(
-                        color = Color.Black, // Color of the separator
-                        modifier = Modifier
-                            .height(24.dp) // Set the height of the separator
-                            .width(1.dp) // Set the width of the separator
                     )
-
-                    // Review Section
                     Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.clickable {
-                            pagerType = PagerTab.REVIEW
-                        }
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Star, // Placeholder icon for "Đánh giá"
-                            contentDescription = "Review Icon",
-                            tint = Color(0xFFFF9800), // Example orange color for star
-                            modifier = Modifier.size(24.dp) // Set icon size
-                        )
-                        Spacer(modifier = Modifier.width(4.dp)) // Add space between icon and text
                         Text(
-                            text = "Đánh giá",
-                            color = if (pagerType == PagerTab.REVIEW) Color.Red else Color.Black
+                            text = "Description: ",
+                            fontSize = 14.sp,
+                            color = Color.Black,
+                            fontWeight = FontWeight.Bold,
+                        )
+                        Text(
+                            text = state.expertData.description
+                                ?: "Chưa cập nhật Chưa cập nhật Chưa cập nhật Chưa cập nhật Chưa cập nhật Chưa cập nhật",
+                            fontSize = 14.sp,
+                            color = Color.Black,
+
                         )
                     }
-                }
-                if (pagerType == PagerTab.PROFILE) {
-                    if (state.expertData.samplesByCategory.isEmpty()) {
-                        Text(
-                            text = "Không có dữ liệu",
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    } else {
-                        state.expertData.samplesByCategory.forEach {
-                            ImageSection(
-                                title = it.title!!,
-                                images = it.samples.map { it.image!! }) // Pass actual data
-                            Spacer(modifier = Modifier.height(16.dp))
-                        }
-                    }
-                } else {
-                    if (state.userReviews.isNullOrEmpty()) {
-                        Text(
-                            text = "Không có dữ liệu",
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    } else {
-                        LazyVerticalGrid(
-                            columns = GridCells.Fixed(2),
-                            modifier = Modifier.weight(1f).padding(16.dp),
+                    Row(
+                        modifier = Modifier
+                            .padding( bottom = 8.dp)
+                            .wrapContentHeight()
+                            .wrapContentWidth()
+                            .align(Alignment.CenterHorizontally)
+                            .background(
+                                color = colorBackground,
+                                shape = RoundedCornerShape(26.dp)
+                            ), // Add some padding around the row
+
+                        horizontalArrangement = Arrangement.SpaceEvenly, // Distribute space evenly between items
+                        verticalAlignment = Alignment.CenterVertically // Vertically center the items
+                    ) {
+
+                        Box(
+                            modifier = Modifier
+                                .width(120.dp)
+                                .padding(vertical = 8.dp, horizontal = 16.dp)
+                                .clickable {
+                                    pagerType = PagerTab.PROFILE
+                                },
                         ) {
-                            items(state.userReviews.size) { index ->
-                                ItemReviewCard(
-                                    item = state.userReviews[index],
+                            androidx.compose.animation.AnimatedVisibility(
+                                visible = pagerType == PagerTab.PROFILE,
+                                enter = fadeIn(),
+                                exit = fadeOut()
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .width(100.dp)
+                                        .background(Color.White, shape = RoundedCornerShape(20.dp))
                                 )
                             }
+                            Text(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp),
+                                textAlign = TextAlign.Center,
+                                fontSize = 13.sp,
+                                text = "Uploaded",
+                                fontWeight = if (pagerType == PagerTab.PROFILE) FontWeight.Bold else FontWeight.Normal,
+                                color = Color.Black // Example color for text
+                            )
                         }
+
+                        // Vertical Separator
+                        Divider(
+                            color = Color.Black, // Color of the separator
+                            modifier = Modifier
+                                .height(12.dp) // Set the height of the separator
+                                .width(2.dp) // Set the width of the separator
+                        )
+
+                        Box(
+                            modifier = Modifier
+                                .width(120.dp)
+                                .padding(vertical = 8.dp, horizontal = 8.dp)
+                                .clickable {
+                                    pagerType = PagerTab.REVIEW
+                                },
+                        ) {
+                            androidx.compose.animation.AnimatedVisibility(
+                                visible = pagerType == PagerTab.REVIEW,
+                                enter = fadeIn(),
+                                exit = fadeOut()
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .width(100.dp)
+                                        .background(Color.White, shape = RoundedCornerShape(20.dp))
+                                )
+                            }
+                            Text(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp),
+                                textAlign = TextAlign.Center,
+                                fontSize = 13.sp,
+                                text = "Reviews",
+                                fontWeight = if (pagerType == PagerTab.REVIEW) FontWeight.Bold else FontWeight.Normal,
+                                color = Color.Black // Example color for text
+                            )
+                        }
+                    }
+                    if (pagerType == PagerTab.PROFILE) {
+                        if (state.expertData.samplesByCategory.isEmpty()) {
+                            Text(
+                                text = "Không có dữ liệu",
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        } else {
+                            val data = state.expertData.samplesByCategory.map {
+                                it.samples.map { samples ->
+                                    samples.image
+                                }
+                            }.flatten()
+
+                            LazyVerticalGrid(
+                                columns = GridCells.Fixed(3),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(8.dp),
+                                contentPadding = PaddingValues(8.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                items(data.size) { index ->
+                                    AsyncImage(
+                                        model = data[index] ,
+                                        contentScale = ContentScale.Crop,
+                                        modifier = Modifier
+                                            .size(100.dp)
+                                            .clip(RoundedCornerShape(8.dp)),
+                                        contentDescription = null,
+                                    )
+                                }
+                            }
+                        }
+                    } else {
+                        if (state.userReviews.isNullOrEmpty()) {
+                            Text(
+                                text = "Không có dữ liệu",
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        } else {
+                            val data = state.userReviews
+                            LazyColumn(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(8.dp),
+                                contentPadding = PaddingValues(8.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ){
+                                items(data.size) { index ->
+                                    ReviewSession(data[index])
+                                }
+                            }
+                        }
+                    }
+
+
+                }
+
+                Box(
+                    modifier = Modifier.align(Alignment.BottomCenter)
+                ){
+                    ActionButtons(){
+                        navToBookingScreen(state.expertData.id ?: "")
                     }
                 }
             }
@@ -212,24 +299,48 @@ fun ProfileScreenStateless(
 fun ProfileTopAppBar(
     navBack: () -> Unit = {},
 ) {
-    TopAppBar(
-        title = { /* No title shown in the screenshot */ },
-        navigationIcon = {
-            IconButton(onClick = { navBack() }) {
-                Icon(Icons.Filled.ArrowBackIosNew, contentDescription = "Back")
-            }
-        },
-        actions = {
-            IconButton(onClick = { /* Handle share action */ }) {
-                Icon(Icons.Filled.Bookmark, contentDescription = "Share")
-            }
-        },
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = ColorFAF9F9, // Or Color.White
-            navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
-            actionIconContentColor = MaterialTheme.colorScheme.onSurface
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 12.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = Icons.Default.ArrowBackIosNew,
+            contentDescription = "Back",
+            tint = Color.Black,
+            modifier = Modifier
+                .background(
+                    color = colorBackground,
+                    shape = CircleShape
+                )
+                .padding(8.dp)
+                .size(22.dp)
+                .clickable {
+                    navBack()
+                }
         )
-    )
+        Text(
+            text = "Expert",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold
+        )
+        Icon(
+            imageVector = Icons.Default.BookmarkBorder,
+            contentDescription = "Back",
+            tint = Color.Black,
+            modifier = Modifier
+                .background(
+                    color = colorBackground,
+                    shape = CircleShape
+                )
+                .padding(8.dp)
+                .size(22.dp)
+                .clickable {
+                }
+        )
+    }
 }
 
 // --- Profile Header Section ---
@@ -240,97 +351,155 @@ fun ProfileHeader(
     address: String? = null,
     description: String? = null,
 ) {
-    Column(
+    Card(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 16.dp, bottom = 8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
     ) {
-        AsyncImage(
-            model = avatar ?: "https://i.ytimg.com/vi/DYkKy3FtSv8/maxresdefault.jpg",
-            contentDescription = "Profile Picture",
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .size(100.dp)
-                .clip(CircleShape)
-                .border(2.dp, Color.Gray.copy(alpha = 0.5f), CircleShape) // Optional border
-        )
-        Spacer(modifier = Modifier.height(12.dp))
-        Text(
-            text = name,
-            fontWeight = FontWeight.Bold,
-            fontSize = 24.sp,
-            color = ColorDB7093,
-            textAlign = TextAlign.Center
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = address ?: "Chưa cập nhật",
-            fontSize = 14.sp,
-            color = Color.Gray,
-            textAlign = TextAlign.Center
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = description ?: "Chưa cập nhật",
-            fontSize = 14.sp,
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.primary // Or a specific blue color
-        )
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.Top
+        ) {
+            // Avatar Image
+            AsyncImage(
+                model = avatar
+                    ?: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQm9eMKD3IaYPOi2BSD_6rpVNf2tkdndzUtcA&s",
+                contentDescription = "Avatar of ",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .width(82.dp)
+                    .height(82.dp)
+                    .clip(RoundedCornerShape(20.dp))
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = name,
+                    modifier = Modifier.wrapContentWidth(),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp,
+                    color = Color.Black
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = address ?: "",
+                    modifier = Modifier.wrapContentWidth(),
+                    fontSize = 12.sp,
+                    color = Color.Black
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(
+                ) {
+                    repeat(5) {
+                        Icon(
+                            imageVector = Icons.Default.Star,
+                            contentDescription = "Star Icon",
+                            tint = Color(0xFFFF9800), // Example orange color for star
+                            modifier = Modifier.size(16.dp) // Set icon size
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "4.8/5",
+                        fontSize = 12.sp,
+                        color = Color.Gray
+                    )
+                }
+            }
+        }
     }
 }
 
-// --- Profile Stats Section (Posts, Followers, Following) ---
 @Composable
-fun ProfileStats() {
-    Row(
+fun ReviewSession(review: UserReviewExpertDTO){
+    Card(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp), // Add horizontal padding
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceAround // Distribute space evenly
+            .fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFF6F6F6)),
     ) {
-        StatItem(count = "102", label = "Orders")
-        StatItem(count = "1.5K", label = "Followers")
-        RatingItem(count = "4.3/5 ⭐", label = "Rating")
+        Column(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                // Avatar Image
+                AsyncImage(
+                    model = review.userAvatar
+                        ?: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQm9eMKD3IaYPOi2BSD_6rpVNf2tkdndzUtcA&s",
+                    contentDescription = "Avatar of ",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .width(50.dp)
+                        .height(50.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = review.userName ?: "",
+                        modifier = Modifier.wrapContentWidth(),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 12.sp,
+                        color = Color.Black
+                    )
+                    Row(
+                    ) {
+                        repeat(5) {
+                            Icon(
+                                imageVector = Icons.Default.Star,
+                                contentDescription = "Star Icon",
+                                tint = Color(0xFFFF9800), // Example orange color for star
+                                modifier = Modifier.size(16.dp) // Set icon size
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "4.8/5",
+                            fontSize = 12.sp,
+                            color = Color.Gray
+                        )
+                    }
+                    Text(
+                        text = review.makeupType ?: "",
+                        modifier = Modifier.wrapContentWidth(),
+                        fontSize = 12.sp,
+                        color = Color.Black
+                    )
+
+                }
+            }
+
+            Text(
+                text = review.comment ?: "",
+                modifier = Modifier.wrapContentWidth(),
+                fontSize = 14.sp,
+                color = Color.Black
+            )
+        }
     }
 }
 
+@Preview
 @Composable
-fun StatItem(count: String, label: String) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            text = count,
-            fontWeight = FontWeight.Bold,
-            fontSize = 18.sp
-        )
-        Spacer(modifier = Modifier.height(2.dp))
-        Text(
-            text = label,
-            fontSize = 12.sp,
-            color = Color.Gray
-        )
-    }
+private fun Preview() {
+    ReviewSession(
+        review = UserReviewExpertDTO()
+    )
 }
-
-
-@Composable
-fun RatingItem(count: String, label: String) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            text = count,
-            fontWeight = FontWeight.Bold,
-            fontSize = 18.sp
-        )
-        Spacer(modifier = Modifier.height(2.dp))
-        Text(
-            text = label,
-            fontSize = 12.sp,
-            color = Color.Gray
-        )
-    }
-}
-
 
 // --- Action Buttons (Book, Follow) ---
 @Composable
@@ -350,49 +519,6 @@ fun ActionButtons(onActionClick: () -> Unit) {
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE91E63)) // Pink color
         ) {
             Text(stringResource(R.string.book), color = Color.White)
-        }
-    }
-}
-
-
-// --- Reusable Image Section (Make up, Skin care) ---
-@Composable
-fun ImageSection(title: String, images: List<String>) { // Use List<String> for URLs
-    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = title,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 16.sp
-            )
-        }
-        LazyRow(
-            modifier = Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            items(images.size) { index -> // Or imageUrl for network images
-                AsyncImage(
-                    model = images[index], // Use Coil/Glide for URLs
-                    contentDescription = "$title Image",
-                    contentScale = ContentScale.Crop,
-                    onError = {
-                        Log.d(
-                            "ProfileScreen",
-                            "Error loading image: ${it.result.throwable.message}"
-                        )
-                    },
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
-                        .size(150.dp),
-                    error = painterResource(R.drawable.internet),
-                )
-            }
         }
     }
 }

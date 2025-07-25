@@ -139,17 +139,25 @@ fun NavigationGraph(
             /*
               - Main Route
              */
-            composable(route = Routes.MainHome.route) {
+            composable(
+                route = Routes.MainHome.route,
+                enterTransition = {
+                    slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Start,
+                        animationSpec = tween(100)
+                    )
+                },
+                exitTransition = {
+                    slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.End,
+                        animationSpec = tween(100)
+                    )
+                }
+            ) {
                 appState.setVisibleBottomNav(true)
                 HomeScreen(
                     navToNotification = {
                         navController.navigate(Routes.MainNotification.createRoute()) {
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    },
-                    navToSearch = {
-                        navController.navigate(Routes.MainSearch.createRoute()) {
                             launchSingleTop = true
                             restoreState = true
                         }
@@ -166,12 +174,6 @@ fun NavigationGraph(
                             restoreState = true
                         }
                     },
-                    navToChatting = {
-                        navController.navigate(Routes.MainChatting.createRoute("0")) {
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    },
                     navToAllTemplate = { title, it ->
                         navController.navigate(
                             Routes.MainAllMakeUpTemplate.createRoute(
@@ -180,12 +182,6 @@ fun NavigationGraph(
                             )
                         ) {
                             launchSingleTop = true
-                            restoreState = true
-                        }
-                    },
-                    navToAI = {
-                        navController.navigate(Routes.Page2.createRoute()) {
-                            launchSingleTop = false
                             restoreState = true
                         }
                     },
@@ -233,13 +229,13 @@ fun NavigationGraph(
                 route = Routes.MainAllMakeUp.route,
                 enterTransition = {
                     slideIntoContainer(
-                        AnimatedContentTransitionScope.SlideDirection.Right,
+                        AnimatedContentTransitionScope.SlideDirection.Start,
                         animationSpec = tween(100)
                     )
                 },
                 exitTransition = {
                     slideOutOfContainer(
-                        AnimatedContentTransitionScope.SlideDirection.Left,
+                        AnimatedContentTransitionScope.SlideDirection.End,
                         animationSpec = tween(100)
                     )
                 }) {
@@ -346,7 +342,18 @@ fun NavigationGraph(
             navigation(
                 startDestination = Routes.Page2.createRoute(),
                 route = "ai",
-
+                enterTransition = {
+                    slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Start,
+                        animationSpec = tween(100)
+                    )
+                },
+                exitTransition = {
+                    slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.End,
+                        animationSpec = tween(100)
+                    )
+                }
                 ) {
                 composable(
                     route = Routes.Page2.route,
@@ -511,12 +518,23 @@ fun NavigationGraph(
              */
             navigation(
                 startDestination = Routes.ScreenUserProfile.route,
-                route = "profile"
+                route = "profile",
+                enterTransition = {
+                    slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Start,
+                        animationSpec = tween(100)
+                    )
+                },
+                exitTransition = {
+                    slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.End,
+                        animationSpec = tween(100)
+                    )
+                }
             ) {
                 composable(
                     route = Routes.ScreenUserProfile.route
                 ) {
-
                     appState.setVisibleBottomNav(true)
                     UserProfileScreenStateful(
                         navToLogin = {

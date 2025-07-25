@@ -38,8 +38,8 @@ class SSEClient @Inject constructor() {
             eventSourceSse = EventSource.Builder(
                 eventHandler, URI.create(baseUrl.plus(PATH))
             )
-                .connectTimeout(java.time.Duration.ofSeconds(3))
-                .backoffResetThreshold(java.time.Duration.ofSeconds(3))
+                .connectTimeout(java.time.Duration.ofSeconds(5))
+                .backoffResetThreshold(java.time.Duration.ofSeconds(5))
                 .build()
 
             eventSourceSse?.let {

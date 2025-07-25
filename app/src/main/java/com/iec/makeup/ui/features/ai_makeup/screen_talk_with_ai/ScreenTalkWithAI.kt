@@ -19,13 +19,20 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
@@ -48,6 +55,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ChainStyle
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -60,6 +68,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
 import com.iec.makeup.R
 import com.iec.makeup.core.ui.DialogCompose
+import com.iec.makeup.core.ui.noRippleClickable
 import com.iec.makeup.ui.features.ai_makeup.screen_talk_with_ai.components.ControlComponent
 import com.iec.makeup.ui.features.ai_makeup.screen_talk_with_ai.components.ImageLauncher
 import com.iec.makeup.ui.features.ai_makeup.screen_talk_with_ai.components.LanguageBottomBar
@@ -67,6 +76,8 @@ import com.iec.makeup.ui.features.ai_makeup.screen_talk_with_ai.components.Messa
 import com.iec.makeup.ui.features.ai_makeup.screen_talk_with_ai.components.ProcessThinkingComponent
 import com.iec.makeup.ui.features.ai_makeup.screen_talk_with_ai.components.StatusListShow
 import com.iec.makeup.ui.features.ai_makeup.screen_talk_with_ai.components.VerifiedTextField
+import com.iec.makeup.ui.theme.onPrimaryColor
+import com.iec.makeup.ui.theme.onPrimaryColorV2
 import com.iec.makeup.utils.TextToSpeechHelper
 import java.io.File
 import java.util.Locale
@@ -198,7 +209,7 @@ fun ScreenTalkWithAI(
                 isShowBottomLanguage = !isShowBottomLanguage
             },
             aiThinking = state.value.thinkingMode,
-            aiStatus = state.value.statusAI,
+            aiStatus = state.value.statusAI.toList(),
             locale = locale,
             showPicker = showImagePicker,
             cameraLauncher = {
@@ -213,7 +224,10 @@ fun ScreenTalkWithAI(
             onTryAgain = {
                 viewModel.resetImageResult()
             },
-            imageResult = state.value.imageResult
+            imageResult = state.value.imageResult,
+            downloadImage = {
+                viewModel.downloadImage(it)
+            }
         )
 
 
@@ -323,7 +337,8 @@ fun ScreenTalkWithAIStateless(
     imageResult: String? = null,
     onStartRecording: () -> Unit = {},
     onEndRecording: () -> Unit = {},
-    onTryAgain: () -> Unit = {}
+    onTryAgain: () -> Unit = {},
+    downloadImage: (String) -> Unit = {}
 ) {
     Box(
         modifier = Modifier
@@ -350,7 +365,7 @@ fun ScreenTalkWithAIStateless(
 
             // Title Text
             Text(
-                text = "Makeup AI",
+                text = "GLAM AURA",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFFFF5969),
@@ -425,13 +440,9 @@ fun ScreenTalkWithAIStateless(
                 Box(
                     modifier = Modifier
                         .constrainAs(logo) {
-                            // Center horizontally to the parent
                             start.linkTo(parent.start)
                             end.linkTo(parent.end)
-                            // Vertical position is handled by the chain
-                        }
-                        .fillMaxWidth()
-                        .padding(horizontal = 32.dp),
+                        },
                     contentAlignment = Alignment.Center
                 ) {
                     AnimatedVisibility(
@@ -445,26 +456,54 @@ fun ScreenTalkWithAIStateless(
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .wrapContentHeight()
+                                .wrapContentHeight(),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Card(
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier
+                                    .sizeIn(
+                                        maxHeight = 250.dp,
+                                        maxWidth = 250.dp
+                                    ), // Let height adapt based on image ratio
                             ) {
-                                AsyncImage(
-                                    contentScale = ContentScale.FillWidth,
-                                    model = "https://aiservice2.ptit.edu.vn/makeup_agent/api/v1/makeup/inpaint/download/$imageResult",
-                                    contentDescription = "Logo",
-                                )
+                                Box(
+                                ) {
+                                    AsyncImage(
+                                        model = "$imageResult",
+                                        contentDescription = "Makeup Result",
+                                        contentScale = ContentScale.Crop, // Keeps original aspect ratio inside the bounds
+                                        modifier = Modifier.fillMaxWidth() // Fill card's width
+                                    )
+                                    Icon(
+                                        imageVector = Icons.Default.Download,
+                                        tint = Color.White,
+                                        modifier = Modifier
+                                            .padding(8.dp)
+                                            .size(26.dp)
+                                            .align(
+                                                Alignment.BottomEnd
+                                            ).noRippleClickable {
+                                                downloadImage(imageResult)
+                                            },
+                                        contentDescription = "Download"
+
+                                    )
+                                }
+
+
                             }
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = "Click here to change image",
+                                text = "Try another image",
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 18.sp,
-                                color = Color.Black,
-                                modifier = Modifier.clickable {
-                                    onTryAgain()
-                                }
+                                fontSize = 16.sp,
+                                color = onPrimaryColorV2,
+                                modifier = Modifier
+                                    .padding(vertical = 8.dp)
+                                    .clickable {
+                                        onTryAgain()
+                                    }
                             )
 
                         }

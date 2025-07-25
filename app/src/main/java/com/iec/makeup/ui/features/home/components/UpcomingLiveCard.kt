@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -31,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -47,110 +49,24 @@ import java.util.Date
 import java.util.Locale
 
 
-data class CardItemData(
-    val id: Int, // Unique ID for stable list rendering
-    val name: String,
-    val description: String,
-    val dateTime: String,
-    val imageSource: Int // Placeholder for image source (URL, Drawable Res ID, Painter)
-)
-
-
-@Composable
-fun InfoCard(
-    item: CardItemData,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier
-            .width(300.dp) // Adjust card width as needed
-            .height(120.dp), // Adjust card height as needed
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = ColorFFF0F5
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxSize(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Left Column for Text
-            Column(
-                modifier = Modifier
-                    .weight(1f) // Takes available space left by the image
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
-                verticalArrangement = Arrangement.SpaceBetween // Distribute space
-            ) {
-                Text(
-                    text = item.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = item.description,
-                    style = MaterialTheme.typography.bodySmall,
-                    maxLines = 2, // Allow up to 2 lines for description
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(modifier = Modifier.weight(1f)) // Push date/time to bottom
-                Text(
-                    text = item.dateTime,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = Color.Gray
-                )
-            }
-
-            // Right Area for Image
-            Box(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .width(100.dp) // Adjust image width as needed
-                    .clip(
-                        RoundedCornerShape(
-                            topEnd = 16.dp,
-                            bottomEnd = 16.dp
-                        )
-                    ) // Clip image to card corners
-                    .background(Color.LightGray), // Placeholder background
-                contentAlignment = Alignment.Center
-            ) {
-                Image(
-                    painter = painterResource(id = item.imageSource),
-                    contentDescription = item.name,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
-            }
-        }
-    }
-}
-
 @Composable
 fun AutoScrollingHorizontalCardList(
     items: List<Int>,
     modifier: Modifier = Modifier,
-    autoScrollDurationMillis: Long = 3000L // Time each item is visible
+    autoScrollDurationMillis: Long = 3000L
 ) {
     val lazyListState = rememberLazyListState()
     val itemCount = items.size
-
-    // LaunchedEffect for auto-scrolling
-    LaunchedEffect(key1 = itemCount) { // Relaunch if item count changes
-        if (itemCount > 1) { // Only scroll if there's more than one item
-            while (isActive) { // Loop while the coroutine is active
-                delay(autoScrollDurationMillis) // Wait for the specified duration
+    LaunchedEffect(key1 = Unit) {
+        if (itemCount > 1) {
+            while (isActive) {
+                delay(autoScrollDurationMillis)
 
                 val currentFirstVisibleIndex = lazyListState.firstVisibleItemIndex
                 val currentFirstVisibleOffset = lazyListState.firstVisibleItemScrollOffset
 
-                // Calculate the next index, wrapping around if necessary
                 var nextIndex = (currentFirstVisibleIndex + 1) % itemCount
                 if (nextIndex == itemCount - 1) nextIndex = 0
-                // If the first item is partially visible, scroll fully to it first,
-                // then scroll to the next one. Otherwise, just scroll to the next.
                 if (currentFirstVisibleOffset > 0) {
                     // Smoothly scroll to align the current item fully
                     lazyListState.animateScrollToItem(
@@ -169,36 +85,46 @@ fun AutoScrollingHorizontalCardList(
         }
     }
 
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+
     LazyRow(
         state = lazyListState,
-        modifier = modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(horizontal = 16.dp), // Padding around the list
-        horizontalArrangement = Arrangement.spacedBy(12.dp) // Space between cards
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        items(
-            items = items,
-        ) { item ->
-//            Image(
-//                painter = painterResource(id = item),
-//                contentDescription = "Image",
-//                modifier = Modifier.fillMaxWidth().heightIn(max = 120.dp),
-//                contentScale = ContentScale.Crop
-//            )
-            AsyncImage(
-                model = "https://i.natgeofe.com/n/390ff269-06b1-4d0c-aeb8-2ff653ec35cc/maui-hula-01.jpg",
-                contentDescription = "Image",
-                modifier = Modifier.fillMaxWidth().heightIn(max = 120.dp),
-                contentScale = ContentScale.Crop
-            )
+        items(items) { item ->
+
+            Card(
+                modifier = Modifier
+                    .width(screenWidth*0.9f)
+                    .wrapContentHeight(),
+                shape = RoundedCornerShape(8.dp),
+                elevation = CardDefaults.cardElevation(
+                    defaultElevation = 4.dp
+                )
+            ) {
+                Image(
+                    painter = painterResource(id = item),
+                    contentDescription = "Image",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 180.dp),
+                    contentScale = ContentScale.Crop
+                )
+            }
         }
     }
 }
 
+@Preview(showSystemUi = true)
+@Composable
+fun PreviewAutoScrollingHorizontalCardList() {
+    AutoScrollingHorizontalCardList(items = getSampleCardData())
+}
 fun getSampleCardData(): List<Int> {
     return listOf(
-        R.drawable.card1,
-        R.drawable.card2,
-        R.drawable.card3,
-        R.drawable.card4
+        R.drawable.banner1,
+        R.drawable.banner2,
+        R.drawable.banner3,
+        R.drawable.banner4
     )
 }

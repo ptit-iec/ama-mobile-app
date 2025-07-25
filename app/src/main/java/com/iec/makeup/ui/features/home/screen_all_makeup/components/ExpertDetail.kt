@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -26,6 +27,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.iec.makeup.R
 import com.iec.makeup.core.model.ui.Expert
 import com.iec.makeup.data.remote.dto.Rating
 import com.iec.makeup.ui.theme.ColorDB7093
@@ -41,9 +43,8 @@ fun ExpertDetail(
         modifier = Modifier
             .fillMaxWidth()
             .clickable {
-                onNavToDetail(item.Id ?: "Chưa cập nhật")
-            }
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+                onNavToDetail(item.Id ?: "Update soon")
+            },
         shape = RoundedCornerShape(16.dp),
         border = BorderStroke(1.dp, ColorDB7093),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
@@ -117,7 +118,9 @@ fun ExpertDetail(
 
                     // Rating and Reviews
                     Icon(
-                        imageVector = Icons.Filled.Star, // Replace with your star icon resource
+                        painter = painterResource(
+                            R.drawable.star
+                        ), // Replace with your star icon resource
                         contentDescription = "Rating",
                         modifier = Modifier.size(18.dp),
                         tint = Color.Yellow
@@ -135,7 +138,7 @@ fun ExpertDetail(
                                     color = Color.Gray
                                 )
                             ) {
-                                append("(${item.rating?.count} đánh giá)")
+                                append("(${item.rating?.count} reviews)")
                             }
                         }
                     )

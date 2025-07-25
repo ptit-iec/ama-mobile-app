@@ -11,15 +11,15 @@
     <string name="page3_title">Shop</string>
     <string name="page4_title">Profile</string>
 
-    <string name="makeup_layout">Available Makeup Looks</string>
-    <string name="expert">Expert</string>
-    <string name="see_all">See All</string>
+    <string name="makeup_layout">Events</string>
+    <string name="expert">Experts</string>
+    <string name="see_all">See all</string>
     <string name="makeup_experiment">AI Makeup Experience</string>
     <string name="instructions">Instructions\n</string>
     <string name="booking">Book an Appointment with an Expert</string>
     <string name="recommend_makeup">Makeup Recommendations</string>
     <string name="chat_with_ai">Chat with AI</string>
-    <string name="book">Book</string>
+    <string name="book">Book an appointment</string>
     <string name="see_profile">View Profile</string>
     <string name="describe_expectation">Describe Desired Makeup Look</string>
     <string name="booking_history">Appointment History</string>

@@ -39,13 +39,13 @@ data class UploadedFile (
 )
 
 interface TalkAIEndpoint {
-    @POST("/makeup_agent/api/v1/chat/chat")
+    @POST("/api/v1/chat/chat")
     suspend fun sendNormalMessage(
         @Body chatRequest: ChatRequest
     ): ChatResponse
 
     @Multipart
-    @POST("/makeup_agent/api/v1/chat/upload-and-chat")
+    @POST("/api/v1/chat/upload-and-chat")
     suspend fun sendImageAndChatMessage(
         @Part file: MultipartBody.Part,
         @Part("message") message: RequestBody,

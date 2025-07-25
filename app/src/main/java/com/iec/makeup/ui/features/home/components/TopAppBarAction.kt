@@ -1,6 +1,7 @@
 package com.iec.makeup.ui.features.home.components
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -43,36 +45,35 @@ import com.iec.makeup.ui.theme.primaryColor
 @Composable
 private fun TopPreview() {
     TopAppBar(
-        showSearch = {},
         showNotifications = {},
-        showChat = {},
         image = ""
     )
 }
 
 @Composable
 fun TopAppBar(
-    showSearch: () -> Unit = {},
     showNotifications: () -> Unit = {},
-    showChat: () -> Unit = {},
     image: String,
     name: String = "Ngo Tuan Anh",
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 16.dp, top = 8.dp, end = 16.dp),
+            .padding(start = 8.dp, end = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        // Logo
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically
+        Row(modifier = Modifier
+            .background(
+                color = Color(0xFFFFF3E9),
+                shape = RoundedCornerShape(4.dp)
+            )
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
 
             Card(
-                modifier = Modifier.size(36.dp),
+                modifier = Modifier.size(28.dp),
                 shape = CircleShape,
                 elevation = CardDefaults.elevatedCardElevation(0.dp),
             ) {
@@ -83,74 +84,29 @@ fun TopAppBar(
                 )
             }
             Spacer(modifier = Modifier.size(8.dp))
-//            if (DateTimeUtils.getCurrentDateTime().isMorning()) {
-//                Text(
-//                    text = "Good morning",
-//                    fontSize = 16.sp,
-//                    fontWeight = FontWeight.Bold,
-//                    fontFamily = FontFamily(
-//                        Font(R.font.montserrat)
-//                    ),
-//                    modifier = Modifier.padding(vertical = 16.dp),
-//                    color = Color.White
-//                )
-//            } else {
-//                Text(
-//                    text = "Good noon",
-//                    fontSize = 16.sp,
-//                    fontWeight = FontWeight.Bold,
-//                    fontFamily = FontFamily(
-//                        Font(R.font.montserrat)
-//                    ),
-//                    modifier = Modifier.padding(vertical = 16.dp),
-//                    color = Color.White
-//                )
-//            }
             Text(
                 text = name,
-                fontSize = 16.sp,
+                fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 fontFamily = FontFamily(
                     Font(R.font.montserrat)
                 ),
-                modifier = Modifier.padding(vertical = 16.dp),
-                color = primaryColor
+                color = Color.Black
             )
+            Spacer(modifier = Modifier.size(8.dp))
 
         }
         // Right Icons
         Icon(
-            imageVector = Icons.Outlined.NotificationsNone,
+            painter = painterResource(R.drawable.bell_01),
             contentDescription = "Notifications",
             modifier = Modifier
                 .padding(horizontal = 8.dp)
+                .size(24.dp)
                 .clickable {
                     showNotifications()
                 },
-            tint = primaryColor
+            tint = Color.White
         )
-//        Row {
-//            Icon(
-//                imageVector = Icons.Outlined.Search,
-//                contentDescription = "Compare",
-//                modifier = Modifier
-//                    .padding(horizontal = 8.dp)
-//                    .clickable {
-//                        showSearch()
-//                    },
-//                tint = Color.White
-//            )
-//
-//            Icon(
-//                imageVector = Icons.Outlined.Chat,
-//                contentDescription = "Settings",
-//                modifier = Modifier
-//                    .padding(horizontal = 8.dp)
-//                    .clickable {
-//                        showChat()
-//                    },
-//                tint = Color.White
-//            )
-//        }
     }
 }

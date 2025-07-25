@@ -123,7 +123,7 @@ fun ScreenDetailTemplateLayout(
                     .weight(1f)
                     .padding(end = 4.dp) // Give weight and padding
             ) {
-                Text("Đóng")
+                Text("Back")
             }
 
             // --- Apply Color Button ---
@@ -139,7 +139,7 @@ fun ScreenDetailTemplateLayout(
                     .weight(1f)
                     .padding(start = 4.dp) // Give weight and padding
             ) {
-                Text("Áp dụng mẫu", color = Color.White) // Set text color explicitly if needed
+                Text("Apply", color = Color.White) // Set text color explicitly if needed
             }
         }
     }

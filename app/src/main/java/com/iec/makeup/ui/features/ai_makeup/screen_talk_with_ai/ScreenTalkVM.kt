@@ -38,7 +38,7 @@ data class ScreenTalkViewState(
     val userSpokenText: List<String> = emptyList(),
     val modifyBoxState: Boolean = false,
     val thinkingMode: String? = null,
-    val statusAI: List<String> = emptyList(),
+    val statusAI: Set<String> = emptySet<String>(),
     val responseAI: String? = null,
     val imageUri: Uri? = null,
     val imageResult: String? = null
@@ -94,7 +94,7 @@ class ScreenTalkReducer : Reducer<ScreenTalkViewState, ScreenTalkViewEvent, Scre
             }
 
             ScreenTalkViewEvent.ClearStatus -> {
-                currentState.copy(statusAI = listOf()) to null
+                currentState.copy(statusAI = setOf()) to null
             }
 
             is ScreenTalkViewEvent.OnCaptureImage -> {
@@ -217,16 +217,17 @@ class ScreenTalkVM @Inject constructor(
                     e.printStackTrace()
                     null
                 }
+
                 dataResponse?.let {
                     var response = it.data.response
-                    extractURLFromMessage(it.data.response)?.let { url ->
-                        if(url.startsWith("result")){
+                    extractURLFromMessage(response)?.let { url ->
+                        if(url.contains("result")){
                             sendEvent(ScreenTalkViewEvent.onImageResult(url))
                             response = response.replace(url, "")
                         }
                     }
                     if(response.isNotEmpty()){
-                        sendEvent(ScreenTalkViewEvent.AIResponse(response))
+                        sendEvent(ScreenTalkViewEvent.AIResponse(cleanString(response)))
                     }
                 }
             }
@@ -260,15 +261,45 @@ class ScreenTalkVM @Inject constructor(
                             message
                         ))
                     }
-
+                    if(it.data.details?.result?.resultPath != null){
+                        sendEvent(ScreenTalkViewEvent.onImageResult(
+                            it.data.details!!.result!!.resultPath
+                        ))
+                    }
+                }
+            }
+            "makeup_result" -> {
+                val dataResponse = try {
+                    jsonParser.decodeFromString<EventDataClass.EventResult>(
+                        messageEvent.data
+                    )
+                }catch (e: SerializationException){
+                    e.printStackTrace()
+                    null
+                }
+                dataResponse?.let {
+                    val result = it.data
+                    result.imageUrl?.let { url ->
+                        sendEvent(ScreenTalkViewEvent.onImageResult(
+                            url
+                        ))
+                    }
                 }
             }
         }
     }
+
+    private fun cleanString(text: String): String {
+        return text.replace(Regex("""[^\w\s]"""), "")
+            .replace(Regex("""\s+"""), " ")
+            .trim()
+    }
+
     private fun extractURLFromMessage(message: String): String? {
-        val regex = Regex("""\([^()]*\)""")
-        val urlFound = regex.find(message)
-        return urlFound?.value
+        val regex = Regex("""\[[^\]]*]\(([^)]+)\)""")
+        val match = regex.find(message)
+
+        return match?.groupValues?.get(1)
     }
     override fun onSSEError(t: Throwable) {
         Log.d("ScreenTalkVM", "onSSEError: ${t.message}")
@@ -277,6 +308,10 @@ class ScreenTalkVM @Inject constructor(
 
     fun resetImageResult(){
         sendEvent(ScreenTalkViewEvent.onImageResult(null))
+    }
+
+    fun downloadImage(url: String) {
+
     }
 
 }
